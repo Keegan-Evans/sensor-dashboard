@@ -1,0 +1,15 @@
+name: dashboard-dev
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python
+  - pandas
+  - dash
+  - plotly
+  - sqlalchemy
+  #- pip
+  #  - "--editable=git+https://github.com/4cscc/mqtt-data-logger.git@main"
+
+  ###  install at some point

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Sensor_Dashboard"
+authors = [
+    {name = "Keegan Evans", email = "keegan.evans@gmail.com"},
+]
+description = "A dashboard for displaying weather station sensor data"
+license = {text = "BSD-3-Clause"}
+version = "0.0.1"
+dependencies = [
+    "dash",
+    "plotly",
+    "pandas",
+]
+
+[tool.setuptools]
+packages = ["sensor_dashboard",
+            "sensor_dashboard.munge_and_plot",
+            "sensor_dashboard.connection",
+            ]
