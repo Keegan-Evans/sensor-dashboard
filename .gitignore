@@ -1,0 +1,6 @@
+*ipynb*
+*pytest*
+__pycache__/
+.devcontainer/
+.DS_Store
+*.egg-info/*
