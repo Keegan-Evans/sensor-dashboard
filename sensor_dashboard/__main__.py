@@ -45,7 +45,8 @@ app.layout = html.Div([
     dcc.Graph(id='rainfall', figure=rainfall_fig),
 ])
 
-if __name__ == '__main__':
+
+def main():
     app.run(debug=True)
     print("ran app")
 
