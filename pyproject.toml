@@ -11,6 +11,8 @@ description = "A dashboard for displaying weather station sensor data"
 license = {text = "BSD-3-Clause"}
 version = "0.0.1"
 dependencies = [
+    "mqtt-data-logger @ git+https://github.com/4cscc/mqtt-data-logger.git@main",
+    "sqlalchemy",
     "dash",
     "plotly",
     "pandas",
@@ -18,6 +20,7 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["sensor_dashboard",
-            "sensor_dashboard.munge_and_plot",
-            "sensor_dashboard.connection",
             ]
+
+[project.scripts]
+run_sensor_dashboard = "sensor_dashboard.__main__:main"
