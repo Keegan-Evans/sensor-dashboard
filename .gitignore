@@ -4,3 +4,4 @@ __pycache__/
 .devcontainer/
 .DS_Store
 *.egg-info/*
+environment.yml
