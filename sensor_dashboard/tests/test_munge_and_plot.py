@@ -1,5 +1,5 @@
 import unittest
-from ..munge_and_plot import (
+from ..munge_and_plot.munge_and_plot import (
     create_wind_polar_plot, create_wind_speed_plot,
     lookup_binned_dir_midpoints, add_cardinal_midpoints_column,
     generate_frequency_by_cardinal, bin_speed_by_beaufort,
@@ -9,7 +9,7 @@ from ..munge_and_plot import (
 import plotly.graph_objects as go
 import pandas as pd
 
-from ..connection import get_queried_df
+from ..connection.connection import get_queried_df
 
 test_degree_directions = []
 

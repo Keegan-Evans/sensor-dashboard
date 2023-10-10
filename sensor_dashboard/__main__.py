@@ -1,5 +1,5 @@
-from sensor_dashboard.connection import get_queried_df
-from sensor_dashboard.munge_and_plot import (
+from connection.connection import get_queried_df
+from munge_and_plot.munge_and_plot import (
     create_wind_polar_plot, munge_wind_data, create_wind_speed_plot,
     create_rainfall_plot,
 )
