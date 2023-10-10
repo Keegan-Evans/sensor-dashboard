@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Sensor_Dashboard"
+name = "sensor_dashboard"
 authors = [
     {name = "Keegan Evans", email = "keegan.evans@gmail.com"},
 ]
@@ -18,9 +18,10 @@ dependencies = [
     "pandas",
 ]
 
-[tool.setuptools]
-packages = ["sensor_dashboard",
-            ]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sensor_dashboard*"]
+exclude = ["tests*"]
 
 [project.scripts]
 run_sensor_dashboard = "sensor_dashboard.__main__:main"
