@@ -24,4 +24,4 @@ include = ["sensor_dashboard*"]
 exclude = ["tests*"]
 
 [project.scripts]
-run_sensor_dashboard = "sensor_dashboard.main:main"
+run_sensor_dashboard = "sensor_dashboard.__main__:main"
