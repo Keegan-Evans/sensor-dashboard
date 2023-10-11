@@ -16,7 +16,7 @@ def get_queried_df():
                                         joinedload(SensorMeasurement.topic),
                                         joinedload(SensorMeasurement.sensor),
                                         joinedload(SensorMeasurement.
-                                                   measurement))
+                                                   measurement)).limit(1000)
         queried_df = pd.read_sql_query(query, connection)
 
         return queried_df
