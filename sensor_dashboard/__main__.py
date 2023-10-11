@@ -47,12 +47,3 @@ def update_from_database(interval):
 def main():
     app.run(host='0.0.0.0')
     print("ran app")
-
-
-if __name__ == '__main__':
-    main()
-
-
-# Do I need to do a manual loop or does the dash app handle this for me?
-# NEXT: embed the dash app in a flask app?
-# wire app to 4CSCC website
