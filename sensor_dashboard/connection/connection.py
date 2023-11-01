@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 from mqtt_data_logger.sensor_data_models import SensorMeasurement
 import pandas as pd
 
-db_fp = os.path.join("sensor_dashboard", "tests", "data", "sensor_data.db")
+db_fp = os.path.join("/", "home", "beta", "sensor_data.db")
 
 sqlite_engine = create_engine(f"sqlite:///{db_fp}")
 # Session = sessionmaker(bind=sqlite_engine)
