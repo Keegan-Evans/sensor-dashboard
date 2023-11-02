@@ -4,13 +4,15 @@ from sqlalchemy.orm import joinedload
 from mqtt_data_logger.sensor_data_models import SensorMeasurement
 import pandas as pd
 
-db_fp = os.path.join("/", "home", "beta", "sensor_data.db")
+default_fp = os.path.join("/", "home", "beta", "sensor_data.db")
 
-sqlite_engine = create_engine(f"sqlite:///{db_fp}")
 # Session = sessionmaker(bind=sqlite_engine)
 
 
-def get_queried_df():
+def get_queried_df(db_fp=default_fp):
+
+    sqlite_engine = create_engine(f"sqlite:///{db_fp}")
+
     with sqlite_engine.connect() as connection:
         query = select(SensorMeasurement).options(
                                         joinedload(SensorMeasurement.topic),
