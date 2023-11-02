@@ -132,6 +132,8 @@ def generate_frequency_by_cardinal_and_strength(df,
                                                 cardinal_dir_col,
                                                 beaufort_col):
     vc = df.value_counts([cardinal_dir_col, beaufort_col], normalize=True)
+    vc.name = 'frequency_by_cardinal_and_strength'
+    print(vc)
 
     df = df.merge(vc, left_on=[cardinal_dir_col, beaufort_col],
                   right_on=[cardinal_dir_col, beaufort_col])

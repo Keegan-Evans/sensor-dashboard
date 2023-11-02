@@ -15,7 +15,7 @@ dependencies = [
     "sqlalchemy",
     "dash",
     "plotly",
-    "pandas",
+    "pandas == 1.5.3",
 ]
 
 [tool.setuptools.packages.find]
