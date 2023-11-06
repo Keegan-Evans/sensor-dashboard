@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, desc
 from sqlalchemy.orm import joinedload
 from mqtt_data_logger.sensor_data_models import SensorMeasurement
 import pandas as pd
@@ -25,7 +25,7 @@ def get_queried_df(db_fp=default_fp):
                                         joinedload(SensorMeasurement.topic),
                                         joinedload(SensorMeasurement.sensor),
                                         joinedload(SensorMeasurement.
-                                                   measurement)).limit(1000)
+                                                   measurement)).order_by(SensorMeasurement.time.desc()).limit(1000)
         queried_df = pd.read_sql_query(query, connection)
 
         return queried_df
