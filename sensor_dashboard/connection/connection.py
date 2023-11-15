@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, select, desc
 from sqlalchemy.orm import joinedload
 from mqtt_data_logger.sensor_data_models import SensorMeasurement
 import pandas as pd
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 import pytest
 
 default_fp = os.path.join("/", "home", "beta", "sensor_data.db")
@@ -41,10 +41,14 @@ def get_queried_df(db_fp=testing_fp, number_of_observations=None, drop_zeros=Tru
         if end_date:
             if not isinstance(end_date, date):
                 raise ValueError("Provided value({}) for `end_date` is type {}, not datetime.date.".format(end_date, type(end_date)))
-            end_date = date(end_date.year, end_date.month, end_date.day + 1)
-            query = query.where(SensorMeasurement.time < end_date) # datetime(end_date, time(23, 59)))
-            
-                
+            end_date = datetime(year=end_date.year,
+                                month=end_date.month,
+                                day=end_date.day,
+                                hour=23,
+                                minute=59,
+                                second=59)
+            query = query.where(SensorMeasurement.time <= end_date)
+
         # if number_of_observations is not None:
             # print("VAlUE OTHER THAN NONE OBSERVED")
             # query = query.limit(number_of_observations)
