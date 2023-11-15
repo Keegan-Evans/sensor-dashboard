@@ -33,7 +33,6 @@ def test_subsets_by_end_date():
     end_date = date(2023, 11, 8)
     queried_df = get_queried_df(db_fp=test_filepath, end_date=end_date)
 
-    print(queried_df['time'].max().date())
     assert queried_df['time'].max() == end_date
 
 def test_subsets_by_start_and_end_date():
@@ -43,3 +42,12 @@ def test_subsets_by_start_and_end_date():
 
     assert queried_df['time'].min() == start_date
     assert queried_df['time'].max() == end_date
+
+def test_subset_by_single_day():
+    test_day = date(2023, 10, 31)
+    queried_df = get_queried_df(db_fp=test_filepath, start_date=test_day, end_date=test_day)
+    
+    for thing in queried_df['time']:
+        print(thing.date())
+
+    assert queried_df['time'].map( lambda day : day == test_day).all()
