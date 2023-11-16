@@ -23,5 +23,13 @@ where = ["."]
 include = ["sensor_dashboard*"]
 exclude = ["tests*"]
 
+# [tool.setuptools.package-data]
+# sensor_dashboard.tests.data = ["*"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+
 [project.scripts]
 run_sensor_dashboard = "sensor_dashboard.__main__:main"
