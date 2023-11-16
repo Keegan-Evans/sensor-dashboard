@@ -6,7 +6,7 @@ from sensor_dashboard.munge_and_plot import (
     create_rainfall_plot,
 )
 
-from atmospheric import (
+from sensor_dashboard.atmospheric import (
     create_temp_plot, create_pressure_plot, create_humidity_plot
 )
 
