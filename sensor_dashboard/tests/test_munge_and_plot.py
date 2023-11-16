@@ -130,7 +130,7 @@ class test_polar(unittest.TestCase):
 
 class TestArrangeWindData(unittest.TestCase):
     def setUp(self):
-        test_db_fp = os.path.join("sensor_dashboard", "tests", "data", "sensor_data.db")
+        test_db_fp = os.path.join("test_sensor_data.db")
         self.raw_df = get_queried_df(db_fp=test_db_fp)
         self.wind_df = just_wind_data(self.raw_df)
 
