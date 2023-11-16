@@ -4,8 +4,7 @@ import os
 
 from datetime import date, datetime
 
-test_filepath =os.path.join(# "sensor-dashboard", # "tests", "data",
-                            "sensor_data.db")
+test_filepath =os.path.join("test_sensor_data.db")
 
 
 def test_basic_connection_no_limit():

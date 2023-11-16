@@ -11,7 +11,7 @@ testing_fp = os.path.join(".", "sensor_data.db")
 
 # Session = sessionmaker(bind=sqlite_engine)
 
-def get_queried_df(db_fp=testing_fp, number_of_observations=None, drop_zeros=True, start_date=None, end_date=None):
+def get_queried_df(db_fp=default_fp, number_of_observations=None, drop_zeros=True, start_date=None, end_date=None):
 
     """
     db_fp: path to the database file. By default, this is the path to `sensor_dashboard/home/beta/sensor_data.db` by `connection.py`.
