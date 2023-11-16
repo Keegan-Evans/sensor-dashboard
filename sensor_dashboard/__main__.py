@@ -45,5 +45,5 @@ def update_from_database(interval):
 
 
 def main():
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
     print("ran app")
