@@ -5,6 +5,11 @@ from sensor_dashboard.munge_and_plot import (
     create_wind_polar_plot, munge_wind_data, create_wind_speed_plot,
     create_rainfall_plot,
 )
+
+from atmospheric import (
+    create_temp_plot, create_pressure_plot, create_humidity_plot
+)
+
 from dash import Dash, html, dcc, Output, Input, callback
 
 
@@ -31,6 +36,15 @@ app.layout = html.Div([
 
     html.H2(children='Rainfall Totals', style={'textAlign': 'left'}),
     dcc.Graph(id='rainfall_fig'),
+
+    html.H2(children='Temperature(degrees Celsius)', style={'textAlign': 'left'}),
+    dcc.Graph(id='temp_fig'),
+
+    html.H2(children='Atmospheric Pressure (mPascals)', style={'textAlign': 'left'}),
+    dcc.Graph(id='pressure_fig'),
+
+    html.H2(children='Relative Humidity', style={'textAlign': 'left'}),
+    dcc.Graph(id='humidity_fig'),
 ])
 
 
@@ -38,13 +52,13 @@ app.layout = html.Div([
     Output('wind_dir_fig', 'figure'),
     Output('wind_spd_fig', 'figure'),
     Output('rainfall_fig', 'figure'),
+    Output('temp_fig', 'figure'),
+    Output('pressure_fig', 'figure'),
+    Output('humidity_fig', 'figure'),
     Input('interval', 'n_intervals'),
-    Input('demo_picker', 'value'),
+    # Input('demo_picker', 'value'),
 )
 def update_from_database(interval, demo_picker):
-    print("#" * 120)
-    print(demo_picker)
-    print("#" * 120)
     df = get_queried_df()
     wind_data = munge_wind_data(df)
 
@@ -53,7 +67,14 @@ def update_from_database(interval, demo_picker):
     wind_spd_fig = create_wind_speed_plot(df)
 
     rainfall_fig = create_rainfall_plot(df)
-    return wind_dir_fig, wind_spd_fig, rainfall_fig, demo_picker
+
+    temp_fig = create_temp_plot(df)
+
+    pressure_fig = create_pressure_plot(df)
+
+    humidity_fig = create_humidity_plot(df)
+
+    return wind_dir_fig, wind_spd_fig, rainfall_fig,temp_fig, pressure_fig, humidity_fig
 
 
 def main():
