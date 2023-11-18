@@ -12,7 +12,7 @@ testing_fp = os.path.join(".", "sensor_data.db")
 
 # Session = sessionmaker(bind=sqlite_engine)
 
-@retry.retry(OperationalError, tries=10, delay=0.125, backoff=0.33)
+# @retry.retry(OperationalError, tries=10, delay=0.125, backoff=0.33)
 def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=True, start_date=None, end_date=None):
 
     """
