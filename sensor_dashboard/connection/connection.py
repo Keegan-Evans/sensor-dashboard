@@ -56,14 +56,14 @@ def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=Tru
 
         # if number_of_observations is not None:
             # print("VAlUE OTHER THAN NONE OBSERVED")
-            # query = query.limit(number_of_observations)
+        query = query.limit(number_of_observations)
 
         # limit number only after all other selection takes place
-        match number_of_observations:
-            case None:
-                pass
-            case int():
-                query = query.limit(number_of_observations)
+        # match number_of_observations:
+            # case None:
+                # pass
+            # case int():
+                # query = query.limit(number_of_observations)
 
         queried_df = pd.read_sql_query(query, connection)
 
