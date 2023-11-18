@@ -13,7 +13,7 @@ testing_fp = os.path.join(".", "sensor_data.db")
 # Session = sessionmaker(bind=sqlite_engine)
 
 # @retry.retry(OperationalError, tries=10, delay=0.125, backoff=0.33)
-def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=True, start_date=None, end_date=None):
+def get_queried_df(db_fp=default_fp, number_of_observations=500, drop_zeros=True, start_date=None, end_date=None):
 
     """
     db_fp: path to the database file. By default, this is the path to `sensor_dashboard/home/beta/sensor_data.db` by `connection.py`.
@@ -65,11 +65,15 @@ def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=Tru
             # case int():
                 # query = query.limit(number_of_observations)
 
-        queried_df = pd.read_sql_query(query, connection)
+        try:
+            queried_df = pd.read_sql_query(query, connection)
+            return queried_df
+        except OperationalError:
+            print("OperationalError encountered. Retrying...")
+            pass
 
-        return queried_df
 
 
 if __name__ == '__main__':
-    results = get_queried_df()
-    print(results.head())
+    results = get_queried_df(testing_fp, number_of_observations=1000)
+    print(results.head(100))
