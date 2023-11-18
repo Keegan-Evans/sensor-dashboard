@@ -4,13 +4,15 @@ from sqlalchemy.orm import joinedload
 from mqtt_data_logger.sensor_data_models import SensorMeasurement
 import pandas as pd
 from datetime import date, datetime, time, timedelta
-import pytest
+import retry
+from sqlite3 import OperationalError
 
 default_fp = os.path.join("/", "home", "beta", "sensor_data.db")
 testing_fp = os.path.join(".", "sensor_data.db")
 
 # Session = sessionmaker(bind=sqlite_engine)
 
+@retry.retry(OperationalError, tries=10, delay=0.125, backoff=0.33)
 def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=True, start_date=None, end_date=None):
 
     """
@@ -64,6 +66,7 @@ def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=Tru
                 query = query.limit(number_of_observations)
 
         queried_df = pd.read_sql_query(query, connection)
+
         return queried_df
 
 

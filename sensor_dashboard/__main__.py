@@ -73,9 +73,8 @@ def update_from_database(interval):
 
     humidity_fig = create_humidity_plot(df)
 
-    return wind_dir_fig, wind_spd_fig, rainfall_fig,temp_fig, pressure_fig, humidity_fig
+    return wind_dir_fig, wind_spd_fig, rainfall_fig, temp_fig, pressure_fig, humidity_fig
 
 
 def main():
-    app.run(host='0.0.0.0', debug=True)
-    print("ran app")
+    app.run(host='0.0.0.0')

@@ -15,6 +15,7 @@ dependencies = [
     "sqlalchemy",
     "dash",
     "plotly",
+    "retry", 
     "pandas == 1.5.3",
 ]
 
