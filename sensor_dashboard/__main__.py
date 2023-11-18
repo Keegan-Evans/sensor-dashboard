@@ -12,6 +12,7 @@ from sensor_dashboard.atmospheric import (
 from dash import Dash, html, dcc, Output, Input, callback
 
 
+
 app = Dash(__name__)
 app.layout = html.Div([
 
@@ -25,7 +26,7 @@ app.layout = html.Div([
                         #  min_date_allowed=date(1920, 1, 1),
                         #  placeholder="select date to see records"),
 
-    dcc.Interval(id='interval', interval=1000 * 1),
+    dcc.Interval(id='interval', interval=1000 * 15),
 
     html.H2(children='Wind Direction Historic', style={'textAlign': 'left'}),
     dcc.Graph(id='wind_dir_fig'),
