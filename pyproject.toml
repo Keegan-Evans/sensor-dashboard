@@ -34,3 +34,4 @@ addopts = [
 
 [project.scripts]
 run_sensor_dashboard = "sensor_dashboard.__main__:main"
+run_soil_moisture_dashboard = "sensor_dashboard.soil_moisture:run_soil_moisture"
