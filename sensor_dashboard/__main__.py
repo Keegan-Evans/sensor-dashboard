@@ -1,5 +1,3 @@
-from datetime import date, datetime
-
 from sensor_dashboard.connection import get_queried_df
 from sensor_dashboard.munge_and_plot import (
     create_wind_polar_plot, munge_wind_data, create_wind_speed_plot,
@@ -10,6 +8,7 @@ from sensor_dashboard.atmospheric import (
 )
 
 from dash import Dash, html, dcc, Output, Input, callback
+import os
 
 
 app = Dash(__name__)
@@ -25,7 +24,7 @@ app.layout = html.Div([
                         #  min_date_allowed=date(1920, 1, 1),
                         #  placeholder="select date to see records"),
 
-    dcc.Interval(id='interval', interval=1000 * 1),
+    dcc.Interval(id='interval', interval=1000 * 15),
 
     html.H2(children='Wind Direction Historic', style={'textAlign': 'left'}),
     dcc.Graph(id='wind_dir_fig'),
@@ -46,6 +45,8 @@ app.layout = html.Div([
     dcc.Graph(id='humidity_fig'),
 ])
 
+# test_db_fp = os.path.join("sensor_data.db")
+
 
 @callback(
     Output('wind_dir_fig', 'figure'),
@@ -54,9 +55,7 @@ app.layout = html.Div([
     Output('temp_fig', 'figure'),
     Output('pressure_fig', 'figure'),
     Output('humidity_fig', 'figure'),
-    Input('interval', 'n_intervals'),
-    # Input('demo_picker', 'value'),
-)
+    Input('interval', 'n_intervals'))
 def update_from_database(interval):
     df = get_queried_df()
     wind_data = munge_wind_data(df)
@@ -73,9 +72,10 @@ def update_from_database(interval):
 
     humidity_fig = create_humidity_plot(df)
 
-    return wind_dir_fig, wind_spd_fig, rainfall_fig,temp_fig, pressure_fig, humidity_fig
+    return (wind_dir_fig, wind_spd_fig, rainfall_fig,
+            temp_fig, pressure_fig, humidity_fig)
 
 
 def main():
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0')
     print("ran app")
