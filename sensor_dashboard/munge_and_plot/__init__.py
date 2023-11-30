@@ -1,5 +1,6 @@
 from .munge_and_plot import (
     create_wind_polar_plot,
+    update_wind_polar_layout,
     create_wind_speed_plot,
     create_rainfall_plot,
     update_wind_plot_layout,
@@ -10,6 +11,7 @@ from .munge_and_plot import (
 
 __all__ = [
     'create_wind_polar_plot',
+    'update_wind_polar_layout',
     'create_wind_speed_plot',
     'create_rainfall_plot',
     'update_wind_plot_layout',

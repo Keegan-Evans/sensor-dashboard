@@ -1,3 +1,4 @@
+from turtle import color
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -57,10 +58,36 @@ def add_trace_by_beaufort(fig, beaufort, df):
             df['beaufort'] == beaufort),
         theta=df['cardinal_midpoints'].where(
             df['beaufort'] == beaufort),
+        customdata=df[['cardinal_direction', 'beaufort']],
         name=beaufort,
         width=(360/16),
-        marker_color=beaufort_colors[beaufort_labels.index(beaufort)]
+        marker_color=beaufort_colors[beaufort_labels.index(beaufort)],
+        hovertemplate='<br>'.join([
+            'Direction: %{customdata[0]}',
+            'Beaufort: %{customdata[1]}'
+        ]),
     ))
+
+
+def update_wind_polar_layout(fig):
+    layout = go.Layout(
+        title='Wind Distribution',
+        polar=dict(
+            
+            angularaxis=dict(
+                showticklabels=True,
+                ticks='outside',
+                type='linear',
+                rotation=90,
+                direction='clockwise',
+                tickvals=[0, 45, 90, 135, 180, 225, 270, 315],
+                ticktext=['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+            ),
+            radialaxis=dict(
+                showticklabels=False),
+        )
+    )
+    fig.update_layout(layout)
 
 
 def create_wind_polar_plot(df):
@@ -68,22 +95,24 @@ def create_wind_polar_plot(df):
 
     for label in beaufort_labels:
         add_trace_by_beaufort(fig, label, df)
+    
+    update_wind_plot_layout(fig)
 
-    fig.update_layout(
-        polar=dict(
-            angularaxis=dict(showticklabels=True, ticks='outside',
-                             type='linear', rotation=90,
-                             direction='clockwise',
-                             tickvals=[0, 45, 90, 135, 180, 225, 270, 315],
-                             ticktext=['N', 'NE', 'E', 'SE', 'S', 'SW', 'W',
-                                       'NW']
-                             ),
-            radialaxis=dict(showticklabels=False),
-
-
-        )
-    )
-
+    # fig.update_layout(
+        # polar=dict(
+            # angularaxis=dict(showticklabels=True, ticks='outside',
+                            #  type='linear', rotation=90,
+                            #  direction='clockwise',
+                            #  tickvals=[0, 45, 90, 135, 180, 225, 270, 315],
+                            #  ticktext=['N', 'NE', 'E', 'SE', 'S', 'SW', 'W',
+                                    #    'NW']
+                            #  ),
+            # radialaxis=dict(showticklabels=False),
+# 
+# 
+        # )
+    # )
+# 
     return fig
 
 
