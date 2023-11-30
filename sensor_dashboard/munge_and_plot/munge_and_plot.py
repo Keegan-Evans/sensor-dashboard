@@ -1,13 +1,15 @@
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import icecream as ic
 
 
 def just_wind_data(df: pd.DataFrame):
-    binned_speed_df = df[df['measurement'] == 'wind_speed_beaufort']
-    binned_wind_dir_df = df[df['measurement'] == 'cardinal_direction']
+    binned_speed_df = df[df['measurement'] == 'wind_speed_beaufort'].copy()
+    binned_wind_dir_df = df[df['measurement'] == 'cardinal_direction'].copy()
 
     binned_wind = binned_speed_df.merge(binned_wind_dir_df, on='time', suffixes=('_speed', '_dir'))
+    # ic.ic(binned_wind)
 
     return binned_wind
 
@@ -61,18 +63,6 @@ def add_trace_by_beaufort(fig, beaufort, df):
     ))
 
 
-def update_trace_by_beaufort(fig, beaufort, df):
-    fig.update_traces(
-        r=df['proportion_frequency_by_cardinal_and_strength'].where(
-            df['beaufort'] == beaufort),
-        theta=df['cardinal_midpoints'].where(
-            df['beaufort'] == beaufort),
-        name=beaufort,
-        width=(360/16),
-        marker_color=beaufort_colors[beaufort_labels.index(beaufort)]
-    )
-
-
 def create_wind_polar_plot(df):
     fig = go.Figure()
 
@@ -87,37 +77,63 @@ def create_wind_polar_plot(df):
                              tickvals=[0, 45, 90, 135, 180, 225, 270, 315],
                              ticktext=['N', 'NE', 'E', 'SE', 'S', 'SW', 'W',
                                        'NW']
-                             )
+                             ),
+            radialaxis=dict(showticklabels=False),
+
+
         )
     )
 
     return fig
 
 
-def update_wind_polar_plot(fig, df):
-    for label in beaufort_labels:
-        update_trace_by_beaufort(fig, label, df)
-    # return fig
+def update_wind_plot_layout(fig):
+    layout = go.Layout(
+        title='Wind Speed',
+        xaxis=dict(
+            title='Time',
+            titlefont_size=16,
+            tickfont_size=14,
+        ),
+        yaxis=dict(
+            title='km/h',
+            titlefont_size=16,
+            tickfont_size=14,
+            range=[0, 80],
+        ),
+        legend=dict(
+            x=0,
+            y=1.0,
+            bgcolor='rgba(255, 255, 255, 0)',
+            bordercolor='rgba(255, 255, 255, 0)'
+        ),
+    )
+    fig.update_layout(layout)
 
 
-def create_wind_speed_plot(df):
+def create_wind_speed_plot(df, layout):
     wind_spd_df = df[df.measurement == 'wind_speed_beaufort']
-    fig = go.Figure()
-    fig.add_scatter(x=wind_spd_df['time'], y=wind_spd_df['value'])
-    # fig = px.scatter(wind_spd_df, x='time', y='value')
+    trace = go.Scatter(
+        x=wind_spd_df['time'],
+        y=wind_spd_df['value'],
+        mode='markers',
+    )
+    
+    fig = go.Figure(data=[trace])
+
     return fig
 
 
 def create_rainfall_plot(df):
     rainfall_df = df[df.measurement == 'rainfall']
-    fig = go.Figure()
-    fig.add_trace(
-        go.Histogram(
-            x=rainfall_df['time'],
-            y=rainfall_df['value'],
-            histfunc='sum',
-            autobinx=True,))
-    fig.update_layout(bargap=0.2)
+    layout = go.Layout(bargap=0.2)
+    trace = go.Histogram(
+        x=rainfall_df['time'],
+        y=rainfall_df['value'],
+        histfunc='sum',
+        autobinx=True,
+        )
+    fig = go.Figure(data=[trace], layout=layout)
     return fig
 
     
