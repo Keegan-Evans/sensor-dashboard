@@ -1,9 +1,10 @@
-from ast import In
-from turtle import up
 import pandas as pd
 from sensor_dashboard.connection import get_queried_df
 from sensor_dashboard.munge_and_plot import (
-    create_wind_polar_plot, create_wind_speed_plot, update_wind_plot_layout
+    munge_wind_data,
+    create_wind_polar_plot,
+    create_wind_speed_plot,
+    update_wind_plot_layout
     )
 from plotly import graph_objects as go
 import plotly.express as px
@@ -11,15 +12,21 @@ from dash import Dash, html, dcc, Output, Input, State
 import os
 import icecream as ic
 from dash.exceptions import PreventUpdate
+from sensor_dashboard.munge_and_plot.plots import MeasurementPlot
 
-from sensor_dashboard.munge_and_plot import (
-    munge_wind_data,
-)
 
 testing_fp = os.path.join(".", "sensor_data.db")
 ic.ic(testing_fp)
 app = Dash(__name__)
+humity_plot = MeasurementPlot('humidity', '%', [0, 100], [0, 100])
 
+@app.callback(
+    Output('humidity_plot', 'children'),
+    [Input('all_data', 'data')],
+)
+def draw_humidity_plot(data):
+    humity_plot.update_df(data)
+    return humity_plot.graph
 
 # callback to get data from database
 @app.callback(
@@ -98,9 +105,9 @@ app.layout = html.Div([
     dcc.Store(id='default_layout', storage_type='memory', data=[]),
     dcc.Store(id='wind_data', storage_type='memory', data=[]),
     dcc.Store(id='all_data', storage_type='memory', data=[]),
-    # html.Div(id='demo_wind_fig', children=[]),
     html.Div(id='demo_polar_fig', children=[]),
     html.Div(id='demo_wind_fig_2', children=[]),
+    html.Div(id='humidity_plot', children=[]),
     html.Div(id='last-update'),
 ])
 

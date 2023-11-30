@@ -1,8 +1,5 @@
-from turtle import color
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
-import icecream as ic
 
 
 def just_wind_data(df: pd.DataFrame):
