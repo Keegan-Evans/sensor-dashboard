@@ -8,12 +8,15 @@ from sensor_dashboard.munge_and_plot.plots import MeasurementPlot
 import icecream as ic
 import datetime as dt
 import pandas as pd
+import logging
 
 import os
 
-
 import sensor_dashboard.util as util
 
+# disable logging to stderr
+# logging.getLogger().disabled = True
+logging.basicConfig(level=logging.WARNING)
 
 app = Dash(__name__)
 ###################
@@ -255,6 +258,3 @@ def main():
     app.run(debug=True)
     # app.run(host='0.0.0.0')
     print("ran app")
-
-if __name__ == "__main__":
-    main()
