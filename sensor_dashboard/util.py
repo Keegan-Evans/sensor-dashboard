@@ -2,6 +2,8 @@ import pytest
 import datetime as dt
 import icecream as ic
 
+ic.ic.disable()
+
 def get_just_date_in_unix_seconds(in_dt: dt.datetime) -> int:
     time_components = [in_dt.hour * 60 ** 2, in_dt.minute * 60, in_dt.second]
     seconds_into_today = sum(time_components)

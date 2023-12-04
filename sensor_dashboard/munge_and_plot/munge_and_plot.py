@@ -9,7 +9,6 @@ def just_wind_data(df: pd.DataFrame):
     binned_wind_dir_df = df[df['measurement'] == 'cardinal_direction'].copy()
 
     binned_wind = binned_speed_df.merge(binned_wind_dir_df, on='time', suffixes=('_speed', '_dir'))
-    # ic.ic(binned_wind)
 
     return binned_wind
 
@@ -171,10 +170,8 @@ def split_into_chunks_of_size_k(x, k):
     return split
 
 def split_into_n_chunks(x, n):
-    ic.ic(x, n)
     leftover = len(x) % n
     size = len(x) // n
-    ic.ic(leftover, size)
     last = x.pop(-1)
     chunked = split_into_chunks_of_size_k(x, k=size)
 
