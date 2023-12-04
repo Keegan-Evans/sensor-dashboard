@@ -1,4 +1,6 @@
+import icecream as ic
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 
 
@@ -163,3 +165,23 @@ def create_rainfall_plot(df):
     return fig
 
     
+def split_into_chunks_of_size_k(x, k):
+    split = [np.array(x)[i:i + k] for i in
+             range(0, len(x), k)]
+    return split
+
+def split_into_n_chunks(x, n):
+    ic.ic(x, n)
+    leftover = len(x) % n
+    size = len(x) // n
+    ic.ic(leftover, size)
+    last = x.pop(-1)
+    chunked = split_into_chunks_of_size_k(x, k=size)
+
+    # ensure that spacing is not too close at end
+    if leftover < 0.7 * size:
+        chunked.pop(-1)
+
+    splits = [each[0] for each in chunked]
+    splits.append(last)
+    return splits

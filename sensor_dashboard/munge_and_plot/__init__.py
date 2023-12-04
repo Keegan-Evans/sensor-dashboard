@@ -7,6 +7,7 @@ from .munge_and_plot import (
     just_wind_data,
     munge_wind_data,
     generate_frequency_by_cardinal_and_strength,
+    split_into_n_chunks,
 )
 
 __all__ = [
@@ -17,5 +18,6 @@ __all__ = [
     'update_wind_plot_layout',
     'just_wind_data',
     'munge_wind_data',
-    'generate_frequency_by_cardinal_and_strength'
+    'generate_frequency_by_cardinal_and_strength',
+    'split_into_n_chunks',
 ]
