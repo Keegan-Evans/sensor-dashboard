@@ -251,6 +251,7 @@ app.layout = html.Div([
 
 
 def main():
+    ic.disable()
     app.run(debug=True)
     # app.run(host='0.0.0.0')
     print("ran app")
