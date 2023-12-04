@@ -16,6 +16,7 @@ dependencies = [
     "dash",
     "plotly",
     "pandas == 1.5.3",
+    "icecream"
 ]
 
 [tool.setuptools.packages.find]

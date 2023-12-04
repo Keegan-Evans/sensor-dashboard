@@ -12,7 +12,7 @@ import pandas as pd
 import os
 
 
-import util
+import sensor_dashboard.util as util
 
 
 app = Dash(__name__)
