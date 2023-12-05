@@ -9,9 +9,6 @@ import icecream as ic
 import datetime as dt
 import pandas as pd
 import logging
-
-import os
-
 import sensor_dashboard.util as util
 
 # disable logging to stderr
@@ -22,6 +19,7 @@ app = Dash(__name__)
 ###################
 # data management callbacks
 # TODO: add error messaging for returning date range with no data.
+
 
 # callback to get data from database
 @app.callback(
@@ -40,18 +38,20 @@ def get_data(interval, selected_dates):
     except ValueError:
         raise PreventUpdate
 
+
 @app.callback(
     Output('output-container-range-slider', 'children'),
     Output('selected_dates', 'data'),
     Input('date-picker', 'value'))
 def update_output(value):
     return (
-        'Select date range of data to view with slider.\n'\
+        'Select date range of data to view with slider.\n'
         ' Currently selected range: {} to {}'.format(
-            dt.date.fromtimestamp(value[0]).strftime("%m-%d-%Y"), 
+            dt.date.fromtimestamp(value[0]).strftime("%m-%d-%Y"),
             dt.date.fromtimestamp(value[1]).strftime("%m-%d-%Y")),
         value
         )
+
 
 # get timestamp of last update
 @app.callback(
@@ -77,9 +77,10 @@ def get_wind_data(data):
 
     return wind_data
 
+
 ###################
 # plot callbacks
-#wind polar plot
+# wind polar plot
 @app.callback(
     Output('wind_polar', 'children'),
     [Input('interval', 'n_intervals'),
@@ -93,7 +94,9 @@ def create_polar_plot(interval, data):
     update_wind_polar_layout(figure)
     return dcc.Graph(figure=figure)
 
+
 humidity_plot = MeasurementPlot('humidity', '%', [0, 100])
+
 
 @app.callback(
     Output('humidity_plot', 'children'),
@@ -105,6 +108,8 @@ def draw_humidity_plot(data):
 
 
 rainfall_plot = MeasurementPlot('rainfall', 'mm', [0, 55])
+
+
 @app.callback(
     Output('rainfall_plot', 'children'),
     [Input('all_data', 'data')],
@@ -162,23 +167,7 @@ range_slider = dcc.RangeSlider(
     max=default_end,
     marks=None
 )
-# app.layout = html.Div([
-    # range_slider,
-    # dcc.Interval(id='interval', interval=1000 * 5),
-    # dcc.Store(id='selected_dates', storage_type='memory', data=[]),
-    # html.Div(id='output-container-range-slider'),
-# 
-    # dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    # dcc.Store(id='all_data', storage_type='memory', data=[]),
-# 
-    # html.Div(id='wind_polar', children=[]),
-    # html.Div(id='windspeed_plot', children=[]),
-    # html.Div(id='temperature_plot', children=[]),
-    # html.Div(id='pressure_plot', children=[]),
-    # html.Div(id='humidity_plot', children=[]),
-    # html.Div(id='rainfall_plot', children=[]),
-    # html.Div(id='last-update'),
-# ])
+
 
 app.layout = html.Div([
 
@@ -201,60 +190,15 @@ app.layout = html.Div([
     html.Div(id='humidity_plot', children=[]),
     html.Div(id='rainfall_plot', children=[]),
     html.Div(id='last-update'),
-# 
-
-    # html.H2(children='Wind Direction Historic', style={'textAlign': 'left'}),
-    # dcc.Graph(id='wind_dir_fig'),
-# 
-    # html.H2(children='Wind Speed (km/H)', style={'textAlign': 'left'}),
-    # dcc.Graph(id='wind_spd_fig'),
-# 
-    # html.H2(children='Rainfall Totals', style={'textAlign': 'left'}),
-    # dcc.Graph(id='rainfall_fig'),
-# 
-    # html.H2(children='Temperature(degrees Celsius)', style={'textAlign': 'left'}),
-    # dcc.Graph(id='temp_fig'),
-# 
-    # html.H2(children='Atmospheric Pressure (mPascals)', style={'textAlign': 'left'}),
-    # dcc.Graph(id='pressure_fig'),
-# 
-    # html.H2(children='Relative Humidity', style={'textAlign': 'left'}),
-    # dcc.Graph(id='humidity_fig'),
 ])
-# 
-# test_db_fp = os.path.join("sensor_data.db")
-# 
-
-# @callback(
-    # Output('wind_dir_fig', 'figure'),
-    # Output('wind_spd_fig', 'figure'),
-    # Output('rainfall_fig', 'figure'),
-    # Output('temp_fig', 'figure'),
-    # Output('pressure_fig', 'figure'),
-    # Output('humidity_fig', 'figure'),
-    # Input('interval', 'n_intervals'))
-# def update_from_database(interval):
-    # df = get_queried_df()
-    # wind_data = munge_wind_data(df)
-# 
-    # wind_dir_fig = create_wind_polar_plot(wind_data)
-# 
-    # wind_spd_fig = create_wind_speed_plot(df)
-# 
-    # rainfall_fig = create_rainfall_plot(df)
-# 
-    # temp_fig = create_temp_plot(df)
-# 
-    # pressure_fig = create_pressure_plot(df)
-# 
-    # humidity_fig = create_humidity_plot(df)
-# 
-    # return (wind_dir_fig, wind_spd_fig, rainfall_fig,
-            # temp_fig, pressure_fig, humidity_fig)
 
 
 def main():
     ic.ic.disable()
-    app.run(debug=True)
-    # app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
+    # app.run(host='0.0.0.0', debug=False)
     print("ran app")
+
+
+if __name__ == "__main__":
+    main()

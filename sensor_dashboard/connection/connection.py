@@ -1,25 +1,14 @@
 import os
-from turtle import st
-from sqlalchemy import create_engine, select, desc
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import joinedload
 from mqtt_data_logger.sensor_data_models import SensorMeasurement
 import pandas as pd
 import datetime as dt
-import pytest
-import icecream as ic
+# import icecream as ic
 
 default_fp = os.path.join("/", "home", "beta", "sensor_data.db")
-testing_fp = os.path.join(".", "sensor_data.db")
+# testing_fp = os.path.join(".", "sensor_data.db")
 
-# Session = sessionmaker(bind=sqlite_engine)
-# def get_max_and_min_dates(db_fp=default_fp):
-    # sqlite_engine = create_engine(f"sqlite:///{db_fp}")
-    # with sqlite_engine.connect() as connection:
-        # query = select(SensorMeasurement).order_by(SensorMeasurement.time.desc())
-        # df = pd.read_sql_query(query, connection)
-        # max_date = df['time'].max().date()
-        # min_date = df['time'].min().date()
-        # return min_date, max_date
 
 def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=True, start_date=None, end_date=None):
 
