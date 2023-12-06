@@ -195,7 +195,7 @@ app.layout = html.Div([
     dcc.Store(id='all_data', storage_type='memory', data=[]),
     html.Div(id='data-retrieval-status'),
     dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    dcc.Interval(id='interval', interval=1000 * 5),
+    dcc.Interval(id='interval', interval=1000 * 60),
 
     html.Div(id='wind_polar', children=[]),
     html.Div(id='windspeed_plot', children=[]),
