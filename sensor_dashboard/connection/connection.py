@@ -7,7 +7,7 @@ import datetime as dt
 # import icecream as ic
 
 default_fp = os.path.join("/", "home", "beta", "sensor_data.db")
-# testing_fp = os.path.join(".", "sensor_data.db")
+testing_fp = os.path.join(".", "sensor_data.db")
 
 
 def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=True, start_date=None, end_date=None):

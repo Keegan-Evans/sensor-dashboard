@@ -1,21 +1,28 @@
+from ast import In
+from tkinter import E, W
+from webbrowser import Opera
 from dash import Dash, html, dcc, Output, Input, State
 from dash.exceptions import PreventUpdate
-from sensor_dashboard.connection import get_queried_df
+from sensor_dashboard.connection import get_queried_df, testing_fp, default_fp
 from sensor_dashboard.munge_and_plot import (
     munge_wind_data, create_wind_polar_plot, update_wind_polar_layout
     )
 from sensor_dashboard.munge_and_plot.plots import MeasurementPlot
 import icecream as ic
+from icecream import ic
 import datetime as dt
 import pandas as pd
-import logging
+# import logging
 import sensor_dashboard.util as util
+import sqlite3
 
 # disable logging to stderr
 # logging.getLogger().disabled = True
-logging.basicConfig(level=logging.WARNING)
+# logging.basicConfig(level=logging.WARNING)
 
 app = Dash(__name__)
+
+
 ###################
 # data management callbacks
 # TODO: add error messaging for returning date range with no data.
@@ -24,19 +31,37 @@ app = Dash(__name__)
 # callback to get data from database
 @app.callback(
     Output('all_data', 'data'),
+    Output('data-retrieval-status', 'children'),
     [Input('interval', 'n_intervals'),
-     Input('selected_dates', 'data')])
+     State('selected_dates', 'data')])
 def get_data(interval, selected_dates):
-    ic.ic(selected_dates)
-    try:
-        df = get_queried_df(start_date=selected_dates[0],
-                            end_date=selected_dates[1])
-        return_data = df.to_dict('records')
-        ic.ic(return_data)
-        return return_data
-
-    except ValueError:
+    ic()
+    if selected_dates == []:
+        ic("Dates not yet selected")
         raise PreventUpdate
+    dates =[dt.date.fromtimestamp(x).strftime("%m-%d-%Y") for x in selected_dates]
+    ic(
+        interval,
+        dates
+       )
+
+    fp = testing_fp
+
+    try:
+        df = get_queried_df(fp,
+                            start_date=selected_dates[0],
+                            end_date=selected_dates[1])
+
+    except Exception as e:
+        ic(str(e))
+        raise PreventUpdate
+        
+    return_data = df.to_dict('records')
+    return return_data, "Data last retrieved: {}".format(dt.datetime.now())
+
+    # except ValueError:
+        # ic("unable to return data")
+        # return PreventUpdate, "Unable to retrieve data at: {}".format(dt.datetime.now())
 
 
 @app.callback(
@@ -59,8 +84,7 @@ def update_output(value):
     [Input('all_data', 'data')],
 )
 def show_last_update(data):
-    if not data:
-        raise PreventUpdate
+    ic()
     dff = pd.DataFrame(data)
     most_recent = str(dff['time'].max())
     return f"Last sensor data reading: {most_recent}"
@@ -72,8 +96,10 @@ def show_last_update(data):
     [Input('all_data', 'data')],
 )
 def get_wind_data(data):
+    ic()
     dff = pd.DataFrame(data)
     wind_data = munge_wind_data(dff).to_dict('records')
+    ic('wind data created, adding to wind_data store')
 
     return wind_data
 
@@ -83,11 +109,12 @@ def get_wind_data(data):
 # wind polar plot
 @app.callback(
     Output('wind_polar', 'children'),
-    [Input('interval', 'n_intervals'),
-     State('wind_data', 'data')],
+    [Input('wind_data', 'data'),],
 )
-def create_polar_plot(interval, data):
+def create_polar_plot(data):
+    ic()
     if not data:
+        ic("data not yet available for wind polar plot")
         raise PreventUpdate
     dff = pd.DataFrame(data)
     figure = create_wind_polar_plot(dff)
@@ -95,28 +122,39 @@ def create_polar_plot(interval, data):
     return dcc.Graph(figure=figure)
 
 
-humidity_plot = MeasurementPlot('humidity', '%', [0, 100])
+###################
+# standard measurement plots
+
+# humidity_plot = MeasurementPlot('humidity', '%', [0, 100])
 
 
-@app.callback(
-    Output('humidity_plot', 'children'),
-    [Input('all_data', 'data')],
-)
-def draw_humidity_plot(data):
-    humidity_plot.update_df(data)
-    return humidity_plot.graph
+# @app.callback(
+#     Output('humidity_plot', 'children'),
+#     [Input('interval', 'n_intervals'),
+#      State('all_data', 'data')],
+# )
+# def draw_humidity_plot(interval, data):
+    # if not data:
+    #     ic("data not yet retrieved")
+    #     raise PreventUpdate
+#     humidity_plot.update_df(data)
+#     return humidity_plot.graph
 
 
-rainfall_plot = MeasurementPlot('rainfall', 'mm', [0, 55])
+# rainfall_plot = MeasurementPlot('rainfall', 'mm', [0, 55])
 
 
-@app.callback(
-    Output('rainfall_plot', 'children'),
-    [Input('all_data', 'data')],
-)
-def draw_plot(data):
-    rainfall_plot.update_df(data)
-    return rainfall_plot.graph
+# @app.callback(
+#     Output('rainfall_plot', 'children'),
+#     [Input('interval', 'n_intervals'),
+#      State('all_data', 'data')],
+# )
+# def draw_plot(interval, data):
+    # if not data:
+    #     ic("data not yet retrieved")
+    #     raise PreventUpdate
+#     rainfall_plot.update_df(data)
+#     return rainfall_plot.graph
 
 
 windspeed_plot = MeasurementPlot(
@@ -125,37 +163,47 @@ windspeed_plot = MeasurementPlot(
 
 @app.callback(
     Output('windspeed_plot', 'children'),
-    [Input('all_data', 'data')],
+    [Input('all_data', 'data'),]
 )
 def draw_windspeed_plot(data):
+    ic()
     windspeed_plot.update_df(data)
-    return windspeed_plot.graph
 
-
-temperature_plot = MeasurementPlot('temperature', '°C', [-25, 35])
-
-
-@app.callback(
-    Output('temperature_plot', 'children'),
-    [Input('all_data', 'data')],
-)
-def draw_temperature_plot(data):
-    temperature_plot.update_df(data)
-    return temperature_plot.graph
-
-
+    return windspeed_plot.figure
+# 
+# 
+# temperature_plot = MeasurementPlot('temperature', '°C', [-25, 35])
+# 
+# 
+# @app.callback(
+    # Output('temperature_plot', 'children'),
+    # [Input('interval', 'n_intervals'),
+    #  State('wind_data', 'data')],
+# )
+# def draw_temperature_plot(interval, data):
+    # if not data:
+    #     ic("data not yet retrieved")
+    #     raise PreventUpdate
+    # temperature_plot.update_df(data)
+    # return temperature_plot.graph
+# 
+# 
 # Atmospheric pressure in hPa
-pressure_plot = MeasurementPlot('pressure', 'hPa', [0, 1100])
-
-
-@app.callback(
-    Output('pressure_plot', 'children'),
-    [Input('all_data', 'data')],
-)
-def draw_pressure_plot(data):
-    pressure_plot.update_df(data)
-    return pressure_plot.graph
-
+# pressure_plot = MeasurementPlot('pressure', 'hPa', [0, 1100])
+# 
+# 
+# @app.callback(
+    # Output('pressure_plot', 'children'),
+    # [Input('interval', 'n_intervals'),
+    #  State('all_data', 'data')],
+# )
+# def draw_pressure_plot(interval, data):
+    # if not data:
+    #     ic("data not yet retrieved")
+    #     raise PreventUpdate
+    # pressure_plot.update_df(data)
+    # return pressure_plot.graph
+# 
 
 default_start, default_end = util.get_default_times()
 
@@ -178,26 +226,27 @@ app.layout = html.Div([
     dcc.Store(id='selected_dates', storage_type='memory', data=[]),
 
     html.Div(id='output-container-range-slider'),
+    html.Div(id='last-update'),
 
     dcc.Store(id='all_data', storage_type='memory', data=[]),
+    html.Div(id='data-retrieval-status'),
     dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    dcc.Interval(id='interval', interval=1000 * 15),
+    dcc.Interval(id='interval', interval=1000 * 5),
 
     html.Div(id='wind_polar', children=[]),
     html.Div(id='windspeed_plot', children=[]),
     html.Div(id='temperature_plot', children=[]),
-    html.Div(id='pressure_plot', children=[]),
-    html.Div(id='humidity_plot', children=[]),
-    html.Div(id='rainfall_plot', children=[]),
-    html.Div(id='last-update'),
+    # html.Div(id='pressure_plot', children=[]),
+    # html.Div(id='humidity_plot', children=[]),
+    # html.Div(id='rainfall_plot', children=[]),
 ])
 
 
 def main():
-    ic.ic.disable()
+    ic.enable()
+    ic("running app")
     app.run(host='0.0.0.0', debug=True)
     # app.run(host='0.0.0.0', debug=False)
-    print("ran app")
 
 
 if __name__ == "__main__":
