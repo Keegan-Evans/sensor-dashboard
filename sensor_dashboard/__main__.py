@@ -1,6 +1,3 @@
-from ast import In
-from tkinter import E, W
-from webbrowser import Opera
 from dash import Dash, html, dcc, Output, Input, State
 from dash.exceptions import PreventUpdate
 from sensor_dashboard.connection import get_queried_df, testing_fp, default_fp
@@ -8,13 +5,11 @@ from sensor_dashboard.munge_and_plot import (
     munge_wind_data, create_wind_polar_plot, update_wind_polar_layout
     )
 from sensor_dashboard.munge_and_plot.plots import MeasurementPlot
-import icecream as ic
 from icecream import ic
 import datetime as dt
 import pandas as pd
 # import logging
 import sensor_dashboard.util as util
-import sqlite3
 
 # disable logging to stderr
 # logging.getLogger().disabled = True
@@ -39,13 +34,15 @@ def get_data(interval, selected_dates):
     if selected_dates == []:
         ic("Dates not yet selected")
         raise PreventUpdate
-    dates =[dt.date.fromtimestamp(x).strftime("%m-%d-%Y") for x in selected_dates]
+    dates = [dt.date.fromtimestamp(x).strftime("%m-%d-%Y")
+             for x in selected_dates]
     ic(
         interval,
         dates
        )
 
-    fp = testing_fp
+    fp = default_fp
+    # fp = testing_fp_fp
 
     try:
         df = get_queried_df(fp,
@@ -58,10 +55,6 @@ def get_data(interval, selected_dates):
         
     return_data = df.to_dict('records')
     return return_data, "Data last retrieved: {}".format(dt.datetime.now())
-
-    # except ValueError:
-        # ic("unable to return data")
-        # return PreventUpdate, "Unable to retrieve data at: {}".format(dt.datetime.now())
 
 
 @app.callback(
