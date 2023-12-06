@@ -125,85 +125,57 @@ def create_polar_plot(data):
 ###################
 # standard measurement plots
 
-# humidity_plot = MeasurementPlot('humidity', '%', [0, 100])
+humidity_plot = MeasurementPlot(
+    target_measurement='humidity',
+    units='%',
+    measurement_range=[0, 100],
+    input_name='all_data',
+    output_name='humidity_plot',
+    app=app,
+    title='Humidity')
 
-
-# @app.callback(
-#     Output('humidity_plot', 'children'),
-#     [Input('interval', 'n_intervals'),
-#      State('all_data', 'data')],
-# )
-# def draw_humidity_plot(interval, data):
-    # if not data:
-    #     ic("data not yet retrieved")
-    #     raise PreventUpdate
-#     humidity_plot.update_df(data)
-#     return humidity_plot.graph
-
-
-# rainfall_plot = MeasurementPlot('rainfall', 'mm', [0, 55])
-
-
-# @app.callback(
-#     Output('rainfall_plot', 'children'),
-#     [Input('interval', 'n_intervals'),
-#      State('all_data', 'data')],
-# )
-# def draw_plot(interval, data):
-    # if not data:
-    #     ic("data not yet retrieved")
-    #     raise PreventUpdate
-#     rainfall_plot.update_df(data)
-#     return rainfall_plot.graph
-
+rainfall_plot = MeasurementPlot(
+    target_measurement='rainfall',
+    units='mm',
+    measurement_range=[0, 250],
+    input_name='all_data',
+    output_name='rainfall_plot',
+    app=app,
+    title='Rainfall')
 
 windspeed_plot = MeasurementPlot(
-    'wind_speed_beaufort', '%', [0, 100], title='Wind Speed')
+    target_measurement='wind_speed_beaufort',
+    units='kph',
+    measurement_range=[0, 75],
+    input_name='all_data',
+    output_name='windspeed_plot',
+    app=app,
+    title='Wind Speed')
+
+temperature_plot = MeasurementPlot(
+    target_measurement='temperature',
+    units='°C',
+    measurement_range=[-25, 35],
+    input_name='all_data',
+    output_name='temperature_plot',
+    app=app,
+    title='Temperature')
 
 
-@app.callback(
-    Output('windspeed_plot', 'children'),
-    [Input('all_data', 'data'),]
-)
-def draw_windspeed_plot(data):
-    ic()
-    windspeed_plot.update_df(data)
-
-    return windspeed_plot.figure
-# 
-# 
-# temperature_plot = MeasurementPlot('temperature', '°C', [-25, 35])
-# 
-# 
-# @app.callback(
-    # Output('temperature_plot', 'children'),
-    # [Input('interval', 'n_intervals'),
-    #  State('wind_data', 'data')],
-# )
-# def draw_temperature_plot(interval, data):
-    # if not data:
-    #     ic("data not yet retrieved")
-    #     raise PreventUpdate
-    # temperature_plot.update_df(data)
-    # return temperature_plot.graph
-# 
-# 
 # Atmospheric pressure in hPa
 # pressure_plot = MeasurementPlot('pressure', 'hPa', [0, 1100])
-# 
-# 
-# @app.callback(
-    # Output('pressure_plot', 'children'),
-    # [Input('interval', 'n_intervals'),
-    #  State('all_data', 'data')],
-# )
-# def draw_pressure_plot(interval, data):
-    # if not data:
-    #     ic("data not yet retrieved")
-    #     raise PreventUpdate
-    # pressure_plot.update_df(data)
-    # return pressure_plot.graph
-# 
+temperature_plot = MeasurementPlot(
+    target_measurement='pressure',
+    units='hPa',
+    measurement_range=[0, 1100],
+    input_name='all_data',
+    output_name='pressure_plot',
+    app=app,
+    title='Atmospheric Pressure')
+
+
+######################
+# Data picking stuff
 
 default_start, default_end = util.get_default_times()
 
@@ -215,7 +187,6 @@ range_slider = dcc.RangeSlider(
     max=default_end,
     marks=None
 )
-
 
 app.layout = html.Div([
 
@@ -236,9 +207,9 @@ app.layout = html.Div([
     html.Div(id='wind_polar', children=[]),
     html.Div(id='windspeed_plot', children=[]),
     html.Div(id='temperature_plot', children=[]),
-    # html.Div(id='pressure_plot', children=[]),
-    # html.Div(id='humidity_plot', children=[]),
-    # html.Div(id='rainfall_plot', children=[]),
+    html.Div(id='pressure_plot', children=[]),
+    html.Div(id='humidity_plot', children=[]),
+    html.Div(id='rainfall_plot', children=[]),
 ])
 
 

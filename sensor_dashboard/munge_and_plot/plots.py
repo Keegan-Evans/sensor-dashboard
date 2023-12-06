@@ -1,5 +1,5 @@
 import pandas as pd
-from dash import dcc
+from dash import dcc, Dash, Output, Input
 from dash.exceptions import PreventUpdate
 import plotly.express as px
 from plotly import graph_objects as go
@@ -8,7 +8,7 @@ from icecream import ic
 
 class MeasurementPlot:
     def __init__(self, target_measurement, units, measurement_range,
-                 title=None) -> None:
+                 input_name, output_name, app: Dash, title=None) -> None:
         ic()
         self.target_measurement = target_measurement
         self.units = units
@@ -18,7 +18,13 @@ class MeasurementPlot:
             self.title = self.target_measurement.capitalize()
         self.measurement_range = measurement_range
         self._fig = None # go.Figure()
-        self.target_df = None
+        self.target_df = pd.DataFrame
+        self.app = app
+
+        self.app.callback(
+            Output(output_name, 'children'),
+            [Input(input_name, 'data')]
+        )(self.draw_plot)
 
     @property
     def layout(self) -> go.Layout:
@@ -101,3 +107,16 @@ class MeasurementPlot:
         ic()
         df = pd.DataFrame(data)
         self.target_df = df[df['measurement'] == self.target_measurement]
+
+    # @app.callback(
+        # Output('self.app.{}_plot'.format(self.title.lower()), 'children'),
+        # [Input('self.app.all_data', 'data')
+        #  ],
+    # )
+    def draw_plot(self, data):
+        ic()
+        if not data:
+            ic("data not yet retrieved")
+            raise PreventUpdate
+        self.update_df(data)
+        return self.figure
