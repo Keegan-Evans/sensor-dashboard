@@ -16,13 +16,27 @@ dependencies = [
     "dash",
     "plotly",
     "pandas == 1.5.3",
-    "icecream"
+    "icecream",
+    "diskcache",
+    "gunicorn"
 ]
 
+[tool.setuptools]
+include-package-data = true
+package-dir = { ""="." }
+
+[tool.setuptools_scm]
+
 [tool.setuptools.packages.find]
+namespaces = true
 where = ["."]
 include = ["sensor_dashboard*"]
-exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.db"]
+# "sensor_dashboard.tests" =["*.db"]
+# tests = ["*.db"]
+"sensor_dashboard.tests.data" = ["*.db"]
 
 # [tool.setuptools.package-data]
 # sensor_dashboard.tests.data = ["*"]
@@ -33,4 +47,5 @@ addopts = [
 ]
 
 [project.scripts]
-run_sensor_dashboard = "sensor_dashboard.__main__:main"
+run_sensor_dashboard = "sensor_dashboard.run_app:server"
+# run_sensor_dashboard = "sensor_dashboard.__main__:main"

@@ -1,14 +1,21 @@
-import icecream as ic
+from icecream import ic
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
 
 def just_wind_data(df: pd.DataFrame):
+    ic(df['measurement'].unique())
     binned_speed_df = df[df['measurement'] == 'wind_speed_beaufort'].copy()
     binned_wind_dir_df = df[df['measurement'] == 'cardinal_direction'].copy()
+    ic(binned_speed_df.head())
+    ic(binned_wind_dir_df.head())
 
-    binned_wind = binned_speed_df.merge(binned_wind_dir_df, on='time', suffixes=('_speed', '_dir'))
+    binned_wind = binned_speed_df.merge(
+        binned_wind_dir_df,
+        on='time',
+        suffixes=('_speed', '_dir')
+        )
 
     return binned_wind
 
@@ -26,11 +33,15 @@ def generate_frequency_by_cardinal_and_strength(
         cardinal_dir_col='str_value_dir',
         beaufort_col='str_value_speed'):
 
-    comb_wind = df.groupby(cardinal_dir_col).value_counts(subset=[beaufort_col], normalize=True,)
+    comb_wind = df.groupby(cardinal_dir_col).value_counts(
+        subset=[beaufort_col],
+        normalize=True,
+        )
     comb_wind.name = 'proportion_frequency_by_cardinal_and_strength'
 
-    out_df = df.merge(comb_wind, left_on=[cardinal_dir_col, beaufort_col],
-                  right_on=[cardinal_dir_col, beaufort_col])
+    out_df = df.merge(comb_wind,
+                      left_on=[cardinal_dir_col, beaufort_col],
+                      right_on=[cardinal_dir_col, beaufort_col])
     out_df.rename(columns={beaufort_col: 'beaufort',
                            cardinal_dir_col: 'cardinal_direction',
                            'value_dir': 'cardinal_midpoints'},
@@ -96,21 +107,6 @@ def create_wind_polar_plot(df):
     
     update_wind_plot_layout(fig)
 
-    # fig.update_layout(
-        # polar=dict(
-            # angularaxis=dict(showticklabels=True, ticks='outside',
-                            #  type='linear', rotation=90,
-                            #  direction='clockwise',
-                            #  tickvals=[0, 45, 90, 135, 180, 225, 270, 315],
-                            #  ticktext=['N', 'NE', 'E', 'SE', 'S', 'SW', 'W',
-                                    #    'NW']
-                            #  ),
-            # radialaxis=dict(showticklabels=False),
-# 
-# 
-        # )
-    # )
-# 
     return fig
 
 
@@ -138,36 +134,12 @@ def update_wind_plot_layout(fig):
     fig.update_layout(layout)
 
 
-def create_wind_speed_plot(df, layout):
-    wind_spd_df = df[df.measurement == 'wind_speed_beaufort']
-    trace = go.Scatter(
-        x=wind_spd_df['time'],
-        y=wind_spd_df['value'],
-        mode='markers',
-    )
-    
-    fig = go.Figure(data=[trace])
 
-    return fig
-
-
-def create_rainfall_plot(df):
-    rainfall_df = df[df.measurement == 'rainfall']
-    layout = go.Layout(bargap=0.2)
-    trace = go.Histogram(
-        x=rainfall_df['time'],
-        y=rainfall_df['value'],
-        histfunc='sum',
-        autobinx=True,
-        )
-    fig = go.Figure(data=[trace], layout=layout)
-    return fig
-
-    
 def split_into_chunks_of_size_k(x, k):
     split = [np.array(x)[i:i + k] for i in
              range(0, len(x), k)]
     return split
+
 
 def split_into_n_chunks(x, n):
     leftover = len(x) % n
