@@ -17,7 +17,7 @@ def get_just_date_in_unix_seconds(in_dt: dt.datetime) -> int:
 # 
 day_seconds = 60 ** 2 * 24
 
-def get_default_times():
+def get_default_dates():
     default_start = int(dt.datetime(year=2023, month=10, day=1).timestamp())
     default_end = get_just_date_in_unix_seconds(dt.datetime.now()) + day_seconds# Tests
     return default_start, default_end
@@ -35,7 +35,7 @@ def test_get_just_date_in_unix_seconds():
     assert date_from_calculated == date_from_lib_call
 
 def test_get_default_times():
-    default_start, default_end = get_default_times()
+    default_start, default_end = get_default_dates()
     ic.ic(default_start, default_end)
     assert default_start < default_end
     assert default_end < dt.datetime.now().timestamp() + day_seconds

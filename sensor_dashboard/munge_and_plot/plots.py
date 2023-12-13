@@ -1,4 +1,6 @@
+from ast import Div
 import pandas as pd
+from sensor_dashboard.connection import get_queried_df, testing_fp
 from dash import dcc, Dash, Output, Input
 from dash.exceptions import PreventUpdate
 import plotly.express as px
@@ -8,7 +10,7 @@ from icecream import ic
 
 class MeasurementPlot:
     def __init__(self, target_measurement, units, measurement_range,
-                 input_name, output_name, app: Dash, title=None) -> None:
+                 input_name, output_name, dates, app: Dash, title=None) -> None:
         ic()
         self.target_measurement = target_measurement
         self.units = units
@@ -18,12 +20,13 @@ class MeasurementPlot:
             self.title = self.target_measurement.capitalize()
         self.measurement_range = measurement_range
         self._fig = None # go.Figure()
-        self.target_df = pd.DataFrame
+        self.target_df = pd.DataFrame()
+        self.dates = dates
         self.app = app
 
         self.app.callback(
             Output(output_name, 'children'),
-            [Input(input_name, 'data')]
+            [Input(input_name, 'n_intervals')]
         )(self.draw_plot)
 
     @property
@@ -61,7 +64,6 @@ class MeasurementPlot:
                        title=self.title,
                        labels={'x': 'Time', 'y': self.units},
                        range_y=self.measurement_range,
-                       
                        )
             ic("figure created for " + self.title)
             self._fig.update_layout(self.layout)
@@ -103,20 +105,58 @@ class MeasurementPlot:
         )
         self._fig.update_layout(layout)
 
-    def update_df(self, data) -> None:
+    def update_df(self) -> None:
         ic()
-        df = pd.DataFrame(data)
-        self.target_df = df[df['measurement'] == self.target_measurement]
+        self.target_df = get_queried_df(db_fp=testing_fp,
+                            start_date=self.dates[0],
+                            end_date=self.dates[1],
+                            target_measurement=self.target_measurement)
+
+        # df = pd.DataFrame(data)
 
     # @app.callback(
         # Output('self.app.{}_plot'.format(self.title.lower()), 'children'),
         # [Input('self.app.all_data', 'data')
         #  ],
     # )
-    def draw_plot(self, data):
+    def draw_plot(self, trigger):
         ic()
-        if not data:
-            ic("data not yet retrieved")
-            raise PreventUpdate
-        self.update_df(data)
+        self.update_df()
+
         return self.figure
+
+if __name__ == '__main__':
+    from sensor_dashboard.util import get_default_dates
+    from timeit import timeit
+    from dash import Dash, html, dcc, DiskcacheManager
+    ic.enable()
+
+    default_dates = get_default_dates()
+    import diskcache
+    cache = diskcache.Cache("./cache")
+    background_callback_manager = DiskcacheManager(cache)
+
+    app = Dash(__name__, background_callback_manager=background_callback_manager)
+    # app = Dash(__name__)
+
+
+
+    temperature_plot = MeasurementPlot(
+        target_measurement='temperature',
+        units='°C',
+        measurement_range=[-25, 35],
+        input_name='interval',
+        output_name='temperature_plot',
+        dates=default_dates,
+        app=app,
+        title='Temperature')
+
+    app.layout = html.Div([
+        html.Div(id='temperature_plot', children=["Loading Temperature Data"]),
+        dcc.Interval(id='interval', interval=1000 * 50),
+    ])
+
+    app.run('0.0.0.0', debug=True)
+    # ic(temperature_plot.target_df)
+    # ic(timeit(lambda: temperature_plot.update_df(), number=1))
+    # ic(temperature_plot.target_df)
