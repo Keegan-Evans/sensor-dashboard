@@ -8,23 +8,56 @@ from sensor_dashboard.munge_and_plot.plots import MeasurementPlot
 from icecream import ic
 import datetime as dt
 import pandas as pd
+from sensor_dashboard.util import get_default_dates
 import sensor_dashboard.util as util
+import os
+
+from flask_caching import Cache
 
 
-app = Dash(__name__)
-default_dates = default_start, default_end = util.get_default_times()
+default_dates = default_start, default_end = get_default_dates()
 
 
 ###################
-import diskcache
-cache = diskcache.Cache("./cache")
-background_callback_manager = DiskcacheManager(cache)
+# App and Cache setup
+ic.enable()
+dash_app = ic(Dash())
+dash_server = ic(dash_app.server)
+
+CACHE_CONFIG = {
+    'CACHE_TYPE': 'redis',
+    'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
+}
+
+cache = ic(Cache())
+assert isinstance(cache, Cache)
+
+ic(cache.init_app(dash_server, CACHE_CONFIG))
+
+
+###################
+# cached data
+@cache.memoize()
+def cache_data():
+    ic()
+    df = ic(get_queried_df(db_fp=testing_fp,
+                           start_date=default_start,
+                           end_date=default_end,
+                           ))
+    return df
+
+
+def get_cached_data(measurement):
+    df = cache_data()
+    df = df[df['measurement'] == measurement]
+    return df
+
+###################
 # data management callbacks
+
 # TODO: add error messaging for returning date range with no data.
-
-
 # callback to get data from database
-@app.callback(
+@dash_app.callback(
     output=[
         Output('all_data', 'data'),
         Output('data-retrieval-status', 'children'),
@@ -33,8 +66,9 @@ background_callback_manager = DiskcacheManager(cache)
         Input('interval', 'n_intervals'),
         State('selected_dates', 'data')
         ],
-    background=True,
-    manager=background_callback_manager)
+    # background=True,
+    # manager=background_callback_manager)
+    )
 def get_data(interval, selected_dates):
     ic()
     if selected_dates == []:
@@ -65,7 +99,7 @@ def get_data(interval, selected_dates):
     return return_data, "Data last retrieved: {}".format(dt.datetime.now())
 
 
-@app.callback(
+@dash_app.callback(
     Output('output-container-range-slider', 'children'),
     Output('selected_dates', 'data'),
     [Input('date-picker', 'value'),
@@ -84,7 +118,7 @@ def update_selected_dates(value, interval):
 
 
 # get timestamp of last update
-@app.callback(
+@dash_app.callback(
     Output('last-update', 'children'),
     [Input('all_data', 'data')],
 )
@@ -96,7 +130,7 @@ def show_last_update(data):
 
 
 # create data for wind polar
-@app.callback(
+@dash_app.callback(
     Output('wind_data', 'data'),
     [Input('all_data', 'data')],
 )
@@ -112,7 +146,7 @@ def create_wind_data(data):
 ###################
 # plot callbacks
 # wind polar plot
-@app.callback(
+@dash_app.callback(
     Output('wind_polar', 'children'),
     [Input('wind_data', 'data'),],
 )
@@ -134,49 +168,54 @@ humidity_plot = MeasurementPlot(
     target_measurement='humidity',
     units='%',
     measurement_range=[0, 100],
-    input_name='all_data',
+    input_name='interval',
     output_name='humidity_plot',
-    app=app,
-    title='Humidity')
+    app=dash_app,
+    title='Humidity',
+    data_caller=get_cached_data)
 
 rainfall_plot = MeasurementPlot(
     target_measurement='rainfall',
     units='mm',
     measurement_range=[0, 250],
-    input_name='all_data',
+    input_name='interval',
     output_name='rainfall_plot',
-    app=app,
-    title='Rainfall')
+    app=dash_app,
+    title='Rainfall',
+    data_caller=get_cached_data)
 
 windspeed_plot = MeasurementPlot(
     target_measurement='wind_speed_beaufort',
     units='kph',
     measurement_range=[0, 75],
-    input_name='all_data',
+    input_name='interval',
     output_name='windspeed_plot',
-    app=app,
-    title='Wind Speed')
+    app=dash_app,
+    title='Wind Speed',
+    data_caller=get_cached_data)
 
 temperature_plot = MeasurementPlot(
     target_measurement='temperature',
     units='°C',
     measurement_range=[-25, 35],
-    input_name='all_data',
+    input_name='interval',
     output_name='temperature_plot',
-    app=app,
-    title='Temperature')
+    app=dash_app,
+    title='Temperature',
+    data_caller=get_cached_data)
 
 
 # Atmospheric pressure in hPa
 # pressure_plot = MeasurementPlot('pressure', 'hPa', [0, 1100])
-temperature_plot = MeasurementPlot(
+pressure_plot = MeasurementPlot(
     target_measurement='pressure',
     units='hPa',
     measurement_range=[0, 1100],
-    input_name='all_data',
+    input_name='interval',
     output_name='pressure_plot',
-    app=app,
-    title='Atmospheric Pressure')
+    app=dash_app,
+    title='Atmospheric Pressure',
+    data_caller=get_cached_data)
 
 
 ######################
@@ -192,21 +231,22 @@ range_slider = dcc.RangeSlider(
     marks=None
 )
 
-app.layout = html.Div([
+dash_app.layout = html.Div([
 
     html.H1(id='weather_station',
             children='Weather Station Data',
             style={'textAlign': 'center'}),
-    range_slider,
-    dcc.Store(id='selected_dates', storage_type='memory', data=[]),
+    # range_slider,
+    # dcc.Store(id='selected_dates', storage_type='memory', data=[]),
+    html.Button('Draw Plots', id='draw-plots',),
 
-    html.Div(id='output-container-range-slider'),
-    html.Div(id='last-update'),
+    # html.Div(id='output-container-range-slider'),
+    # html.Div(id='last-update'),
 
-    dcc.Store(id='all_data', storage_type='memory', data=[]),
-    html.Div(id='data-retrieval-status'),
+    # dcc.Store(id='all_data', storage_type='memory', data=[]),
+    # html.Div(id='data-retrieval-status'),
     # dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    dcc.Interval(id='interval', interval=1000 * 60),
+    dcc.Interval(id='interval', interval=1000 * 6),
 
     # html.Div(id='wind_polar', children=[]),
     html.Div(id='windspeed_plot', children=[]),
@@ -220,7 +260,7 @@ app.layout = html.Div([
 def main():
     ic.enable()
     ic("running app")
-    app.run_server(debug=True)
+    dash_app.run_server(debug=True)
     # app.run(host='0.0.0.0', debug=False)
 
 
