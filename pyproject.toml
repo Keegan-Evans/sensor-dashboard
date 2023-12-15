@@ -19,7 +19,8 @@ dependencies = [
     "icecream",
     "dash[celery]",
     "celery", 
-    "gunicorn"
+    "gunicorn",
+    "flask-caching"
 ]
 
 [tool.setuptools]
