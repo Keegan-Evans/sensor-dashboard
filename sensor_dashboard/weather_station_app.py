@@ -51,7 +51,7 @@ ic(cache.init_app(dash_server, CACHE_CONFIG))
 @cache.memoize()
 def cache_data():
     ic()
-    df = ic(get_queried_df(db_fp=testing_fp,
+    df = ic(get_queried_df(db_fp=default_fp,
                            start_date=default_start,
                            end_date=default_end,
                            ))
@@ -67,7 +67,7 @@ def get_cached_data(measurement):
 @cache.memoize()
 def cache_wind_data():
     ic()
-    df = ic(get_wind_df(db_fp=testing_fp,
+    df = ic(get_wind_df(db_fp=default_fp,
                         start_date=default_start,
                         end_date=default_end,
                         ))
@@ -264,7 +264,7 @@ dash_app.layout = html.Div([
             style={'textAlign': 'center'}),
     # range_slider,
     # dcc.Store(id='selected_dates', storage_type='memory', data=[]),
-    html.Button('Draw Plots', id='draw-plots'),
+    # html.Button('Draw Plots', id='draw-plots'),
 
     # html.Div(id='output-container-range-slider'),
     # html.Div(id='last-update'),
