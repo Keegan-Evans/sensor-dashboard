@@ -17,8 +17,8 @@ dependencies = [
     "plotly",
     "pandas == 1.5.3",
     "icecream",
-    "dash[diskcache]",
-    "diskcache",
+    "dash[celery]",
+    "celery", 
     "gunicorn"
 ]
 

@@ -7,3 +7,4 @@ __pycache__/
 environment.yml
 build/
 IGNORED/
+sensor_dashboard/tests/data/test_data.db
