@@ -2,7 +2,7 @@ from dash import Dash, html, dcc, Output, Input, State, DiskcacheManager, no_upd
 from dash.exceptions import PreventUpdate
 from sensor_dashboard.connection import get_queried_df, testing_fp, default_fp
 from sensor_dashboard.munge_and_plot import (
-    munge_wind_data, create_wind_polar_plot, update_wind_polar_layout
+    create_wind_polar_plot, update_wind_polar_layout,
     )
 from sensor_dashboard.munge_and_plot.plots import MeasurementPlot
 from icecream import ic
@@ -51,6 +51,18 @@ def get_cached_data(measurement):
     df = cache_data()
     df = df[df['measurement'] == measurement]
     return df
+
+
+@cache.memoize()
+def cache_wind_data(self):
+    ic()
+    df = ic(get_wind_df(db_fp=testing_fp,
+                        start_date=default_start,
+                        end_date=default_end,
+                        ))
+    return df
+
+
 
 ###################
 # data management callbacks

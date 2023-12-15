@@ -1,16 +1,18 @@
-from ast import Div
 import pandas as pd
 from sensor_dashboard.connection import get_queried_df, testing_fp
-from dash import dcc, Dash, Output, Input
+from sensor_dashboard.util import get_default_dates
+from dash import dcc, Dash, Output, Input, html
 from dash.exceptions import PreventUpdate
 import plotly.express as px
 from plotly import graph_objects as go
+import os
 from icecream import ic
+from flask_caching import Cache
 
 
 class MeasurementPlot:
-    def __init__(self, target_measurement, units, measurement_range,
-                 input_name, output_name, dates, app: Dash, title=None) -> None:
+    def __init__(self, target_measurement, units, measurement_range, app,
+                 input_name, output_name, data_caller, title=None) -> None:
         ic()
         self.target_measurement = target_measurement
         self.units = units
@@ -20,9 +22,9 @@ class MeasurementPlot:
             self.title = self.target_measurement.capitalize()
         self.measurement_range = measurement_range
         self._fig = None # go.Figure()
-        self.target_df = pd.DataFrame()
-        self.dates = dates
+        self.target_df = None
         self.app = app
+        self.data_caller = data_caller
 
         self.app.callback(
             Output(output_name, 'children'),
@@ -107,10 +109,11 @@ class MeasurementPlot:
 
     def update_df(self) -> None:
         ic()
-        self.target_df = get_queried_df(db_fp=testing_fp,
-                            start_date=self.dates[0],
-                            end_date=self.dates[1],
-                            target_measurement=self.target_measurement)
+        self.target_df = self.data_caller(self.target_measurement)
+        # self.target_df = get_queried_df(db_fp=testing_fp,
+                            # start_date=self.dates[0],
+                            # end_date=self.dates[1],
+                            # target_measurement=self.target_measurement)
 
         # df = pd.DataFrame(data)
 
@@ -125,38 +128,60 @@ class MeasurementPlot:
 
         return self.figure
 
+
 if __name__ == '__main__':
-    from sensor_dashboard.util import get_default_dates
-    from timeit import timeit
-    from dash import Dash, html, dcc, DiskcacheManager
+
+        ###################
+    # App and Cache setup
     ic.enable()
+    dash_app = ic(Dash())
+    dash_server = ic(dash_app.server)
 
-    default_dates = get_default_dates()
-    import diskcache
-    cache = diskcache.Cache("./cache")
-    background_callback_manager = DiskcacheManager(cache)
+    CACHE_CONFIG = {
+        'CACHE_TYPE': 'redis',
+        'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
+    }
 
-    app = Dash(__name__, background_callback_manager=background_callback_manager)
-    # app = Dash(__name__)
+    cache = ic(Cache())
+    assert isinstance(cache, Cache)
+
+    ic(cache.init_app(dash_server, CACHE_CONFIG))
+
+    default_start, default_end = get_default_dates()
+
+    dash_app.run(debug=True)
+
+
+    # from sensor_dashboard.util import get_default_dates
+    # from timeit import timeit
+    # from dash import Dash, html, dcc, DiskcacheManager
+    # ic.enable()
+
+    # default_dates = get_default_dates()
+    # import diskcache
+    # cache = diskcache.Cache("./cache")
+    # background_callback_manager = DiskcacheManager(cache)
+
+    # app = Dash(__name__, background_callback_manager=background_callback_manager)
+    # # app = Dash(__name__)
 
 
 
-    temperature_plot = MeasurementPlot(
-        target_measurement='temperature',
-        units='°C',
-        measurement_range=[-25, 35],
-        input_name='interval',
-        output_name='temperature_plot',
-        dates=default_dates,
-        app=app,
-        title='Temperature')
+    # temperature_plot = MeasurementPlot(
+    #     target_measurement='temperature',
+    #     units='°C',
+    #     measurement_range=[-25, 35],
+    #     input_name='interval',
+    #     output_name='temperature_plot',
+    #     app=app,
+    #     title='Temperature')
 
-    app.layout = html.Div([
-        html.Div(id='temperature_plot', children=["Loading Temperature Data"]),
-        dcc.Interval(id='interval', interval=1000 * 50),
-    ])
+    # app.layout = html.Div([
+    #     html.Div(id='temperature_plot', children=["Loading Temperature Data"]),
+    #     dcc.Interval(id='interval', interval=1000 * 50),
+    # ])
 
-    app.run('0.0.0.0', debug=True)
-    # ic(temperature_plot.target_df)
-    # ic(timeit(lambda: temperature_plot.update_df(), number=1))
-    # ic(temperature_plot.target_df)
+    # app.run('0.0.0.0', debug=True)
+    # # ic(temperature_plot.target_df)
+    # # ic(timeit(lambda: temperature_plot.update_df(), number=1))
+    # # ic(temperature_plot.target_df)
