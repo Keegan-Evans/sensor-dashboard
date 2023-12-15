@@ -9,7 +9,7 @@ from sensor_dashboard.util import limit_observations
 # import numpy as np
 
 default_fp = os.path.join("/", "home", "beta", "sensor_data.db")
-testing_fp = os.path.join("sensor_dashboard", "tests", "data", "sensor_data.db")
+testing_fp = os.path.join("sensor_dashboard", "tests", "data", "test_data.db")
 
 
 def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=True, start_date=None, end_date=None, target_measurement=None):

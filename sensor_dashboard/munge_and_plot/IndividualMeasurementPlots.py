@@ -28,7 +28,7 @@ class MeasurementPlot:
 
         self.app.callback(
             Output(output_name, 'children'),
-            [Input(input_name, 'n_intervals')]
+            [Input(input_name, 'data')]
         )(self.draw_plot)
 
     @property

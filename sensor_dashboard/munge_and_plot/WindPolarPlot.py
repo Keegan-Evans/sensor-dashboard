@@ -250,7 +250,7 @@ class WindRosePlot:
 
         self.app.callback(
             Output(output_name, 'children'),
-            [Input(input_name, 'n_clicks')]
+            [Input(input_name, 'data')]
         )(self.draw_plot)
 
     @property

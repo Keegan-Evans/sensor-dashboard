@@ -32,20 +32,20 @@ CACHE_CONFIG = {
     'CACHE_TYPE': 'redis',
     'CACHE_REDIS_URL': REDIS_URL
 }
-if 'REDIS_URL' not in os.environ:
-    ic("did not find url")
 
-celery_app = Celery(__name__, broker=REDIS_URL, backend=REDIS_URL)
-background_callback_manager = CeleryManager(celery_app)
+# celery_app = Celery(__name__, broker=REDIS_URL, backend=REDIS_URL)
+# background_callback_manager = CeleryManager(celery_app,
+                                            # cache_by=[
+                                                # cache_data,
+                                                # cache_wind_data])
 
 cache = ic(Cache())
 assert isinstance(cache, Cache)
 
 ic(cache.init_app(dash_server, CACHE_CONFIG))
 
-
 ###################
-# cached data
+# cached data functions
 # TODO: Set these up as callbacks on long interval to refresh data.
 
 @cache.memoize()
@@ -65,7 +65,7 @@ def get_cached_data(measurement):
 
 
 @cache.memoize()
-def cache_wind_data(self):
+def cache_wind_data():
     ic()
     df = ic(get_wind_df(db_fp=testing_fp,
                         start_date=default_start,
@@ -75,8 +75,23 @@ def cache_wind_data(self):
 
 
 
+
+
+
 ###################
 # data management callbacks
+
+@dash_app.callback(
+    Output('signal', 'data'),
+    Input('interval', 'n_intervals')
+)
+def populate_cache(interval):
+    ic()
+    ic(cache_data())
+    ic(cache_wind_data())
+    ic("caches populated")
+
+
 
 # TODO: add error messaging for returning date range with no data.
 # callback to get data from database
@@ -166,7 +181,7 @@ def cache_wind_data(self):
 ###################
 # plot callbacks
 # wind polar plot
-polar_plot = WindRosePlot(input_name='interval',
+polar_plot = WindRosePlot(input_name='signal',
                           output_name='wind_polar',
                           app=dash_app,
                           data_caller=cache_wind_data,
@@ -179,7 +194,7 @@ humidity_plot = MeasurementPlot(
     target_measurement='humidity',
     units='%',
     measurement_range=[0, 100],
-    input_name='interval',
+    input_name='signal',
     output_name='humidity_plot',
     app=dash_app,
     title='Humidity',
@@ -189,7 +204,7 @@ rainfall_plot = MeasurementPlot(
     target_measurement='rainfall',
     units='mm',
     measurement_range=[0, 250],
-    input_name='interval',
+    input_name='signal',
     output_name='rainfall_plot',
     app=dash_app,
     title='Rainfall',
@@ -199,7 +214,7 @@ windspeed_plot = MeasurementPlot(
     target_measurement='wind_speed_beaufort',
     units='kph',
     measurement_range=[0, 75],
-    input_name='interval',
+    input_name='signal',
     output_name='windspeed_plot',
     app=dash_app,
     title='Wind Speed',
@@ -209,7 +224,7 @@ temperature_plot = MeasurementPlot(
     target_measurement='temperature',
     units='°C',
     measurement_range=[-25, 35],
-    input_name='interval',
+    input_name='signal',
     output_name='temperature_plot',
     app=dash_app,
     title='Temperature',
@@ -222,7 +237,7 @@ pressure_plot = MeasurementPlot(
     target_measurement='pressure',
     units='hPa',
     measurement_range=[0, 1100],
-    input_name='interval',
+    input_name='signal',
     output_name='pressure_plot',
     app=dash_app,
     title='Atmospheric Pressure',
@@ -257,7 +272,7 @@ dash_app.layout = html.Div([
     # dcc.Store(id='all_data', storage_type='memory', data=[]),
     # html.Div(id='data-retrieval-status'),
     # dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    dcc.Interval(id='interval', interval=1000 * 6),
+    dcc.Interval(id='interval', interval=1000 * 60),
 
     html.Div(id='wind_polar', children=[]),
     html.Div(id='windspeed_plot', children=[]),
@@ -265,6 +280,8 @@ dash_app.layout = html.Div([
     html.Div(id='pressure_plot', children=[]),
     html.Div(id='humidity_plot', children=[]),
     html.Div(id='rainfall_plot', children=[]),
+
+    dcc.Store('signal')
 ])
 
 
