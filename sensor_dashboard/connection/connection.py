@@ -45,6 +45,7 @@ def get_queried_df(db_fp=default_fp, number_of_observations=1000, drop_zeros=Tru
             .order_by(SensorMeasurement.time.asc())
         
 
+
         if drop_zeros:
             query = query.where(SensorMeasurement.value > 0)
 

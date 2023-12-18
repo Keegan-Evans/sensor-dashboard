@@ -40,6 +40,7 @@ include = ["sensor_dashboard*"]
 # tests = ["*.db"]
 "sensor_dashboard.tests.data" = ["*.db"]
 
+
 # [tool.setuptools.package-data]
 # sensor_dashboard.tests.data = ["*"]
 
@@ -50,4 +51,3 @@ addopts = [
 
 [project.scripts]
 run_sensor_dashboard = "sensor_dashboard.run_app:main"
-# run_sensor_dashboard = "sensor_dashboard.__main__:main"
