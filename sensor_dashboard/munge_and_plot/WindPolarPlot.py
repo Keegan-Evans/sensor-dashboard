@@ -14,11 +14,20 @@ from sensor_dashboard.util import get_default_dates, limit_observations
 import plotly.express as px
 
 
-def get_wind_df(db_fp, start_date, end_date, drop_zeros=True):
+def get_wind_df(db_fp, start_date=None, end_date=None, drop_zeros=True):
     ic()
 
-    dt_start_date = dt.datetime.fromtimestamp(start_date)
-    dt_end_date = dt.datetime.fromtimestamp(end_date)
+    today = dt.datetime.now()
+    dt_end_date = dt.datetime(year=today.year,
+                      month=today.month,
+                      day=today.day,
+                      hour=23,
+                      minute=59,
+                      second=59
+                      )
+    dt_start_date = dt_end_date - dt.timedelta(weeks=2, days=1, seconds=-1)
+    # dt_start_date = dt.datetime.fromtimestamp(start_date)
+    # dt_end_date = dt.datetime.fromtimestamp(end_date)
 
     sqlite_engine = create_engine(f"sqlite:///{db_fp}")
 
