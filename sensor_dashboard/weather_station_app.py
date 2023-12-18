@@ -1,3 +1,4 @@
+import uu
 from dash import Dash, html, dcc, Output, Input, State, CeleryManager, no_update, ctx
 from dash.exceptions import PreventUpdate
 from sensor_dashboard.connection import get_queried_df, testing_fp, default_fp
@@ -12,32 +13,31 @@ import pandas as pd
 from sensor_dashboard.util import get_default_dates
 import sensor_dashboard.util as util
 import os
+from uuid import uuid4
 
 from flask_caching import Cache
 from celery import Celery
 
 
 # TODO: Get rid of this when date picker is enabled
+launch_uid = uuid4()
 default_dates = default_start, default_end = get_default_dates()
 
 
 ###################
 # App and Cache setup
 ic.enable()
-dash_app = ic(Dash())
-dash_server = ic(dash_app.server)
-
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 CACHE_CONFIG = {
     'CACHE_TYPE': 'redis',
     'CACHE_REDIS_URL': REDIS_URL
 }
+celery_app = ic(Celery(__name__, broker=REDIS_URL, backend=REDIS_URL))
+background_callback_manager = ic(CeleryManager(celery_app,
+                                               cache_by=[lambda: launch_uid]))
+dash_app = ic(Dash(background_callback_manager=background_callback_manager))
+dash_server = ic(dash_app.server)
 
-# celery_app = Celery(__name__, broker=REDIS_URL, backend=REDIS_URL)
-# background_callback_manager = CeleryManager(celery_app,
-                                            # cache_by=[
-                                                # cache_data,
-                                                # cache_wind_data])
 
 cache = ic(Cache())
 assert isinstance(cache, Cache)
@@ -51,7 +51,7 @@ ic(cache.init_app(dash_server, CACHE_CONFIG))
 @cache.memoize()
 def cache_data():
     ic()
-    df = ic(get_queried_df(db_fp=default_fp,
+    df = ic(get_queried_df(db_fp=testing_fp,
                            start_date=default_start,
                            end_date=default_end,
                            ))
@@ -67,29 +67,35 @@ def get_cached_data(measurement):
 @cache.memoize()
 def cache_wind_data():
     ic()
-    df = ic(get_wind_df(db_fp=default_fp,
+    df = ic(get_wind_df(db_fp=testing_fp,
                         start_date=default_start,
                         end_date=default_end,
                         ))
     return df
 
 
-
-
-
-
 ###################
 # data management callbacks
-
 @dash_app.callback(
     Output('signal', 'data'),
-    Input('interval', 'n_intervals')
+    # Input('get-data', 'n_clicks'),
+    Input('interval', 'n_intervals'),
+    background=True,
 )
 def populate_cache(interval):
     ic()
     ic(cache_data())
+    ic("global data cached")
+
+@dash_app.callback(
+    Output('wind-signal', 'data'),
+    [Input('signal', 'data')],
+    prevent_initial_call=True
+)
+def populate_wind_cache(signal):
     ic(cache_wind_data())
-    ic("caches populated")
+    ic("wind data cached")
+
 
 
 
@@ -181,7 +187,7 @@ def populate_cache(interval):
 ###################
 # plot callbacks
 # wind polar plot
-polar_plot = WindRosePlot(input_name='signal',
+polar_plot = WindRosePlot(input_name='wind-signal',
                           output_name='wind_polar',
                           app=dash_app,
                           data_caller=cache_wind_data,
@@ -264,7 +270,7 @@ dash_app.layout = html.Div([
             style={'textAlign': 'center'}),
     # range_slider,
     # dcc.Store(id='selected_dates', storage_type='memory', data=[]),
-    # html.Button('Draw Plots', id='draw-plots'),
+    # html.Button('Update Data', id='get-data'),
 
     # html.Div(id='output-container-range-slider'),
     # html.Div(id='last-update'),
@@ -272,7 +278,13 @@ dash_app.layout = html.Div([
     # dcc.Store(id='all_data', storage_type='memory', data=[]),
     # html.Div(id='data-retrieval-status'),
     # dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    dcc.Interval(id='interval', interval=1000 * 60),
+    dcc.Interval(id='interval', interval=1000 * 30),
+    # html.Div(id='getting-data', children=[])
+
+    html.Div([
+        html.P(id="paragraph_id", children=["Wait for data to update"]),
+        html.Progress(id="progress_bar", value="0"),
+        ]),
 
     html.Div(id='wind_polar', children=[]),
     html.Div(id='windspeed_plot', children=[]),
@@ -281,7 +293,8 @@ dash_app.layout = html.Div([
     html.Div(id='humidity_plot', children=[]),
     html.Div(id='rainfall_plot', children=[]),
 
-    dcc.Store('signal')
+    dcc.Store('signal'),
+    dcc.Store('wind-signal')
 ])
 
 

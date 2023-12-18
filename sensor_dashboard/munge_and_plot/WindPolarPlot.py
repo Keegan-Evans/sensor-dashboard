@@ -250,7 +250,8 @@ class WindRosePlot:
 
         self.app.callback(
             Output(output_name, 'children'),
-            [Input(input_name, 'data')]
+            [Input(input_name, 'data')],
+            prevent_initial_call=True
         )(self.draw_plot)
 
     @property
