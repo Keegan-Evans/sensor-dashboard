@@ -1,17 +1,14 @@
-from .munge_and_plot import (
-    create_wind_polar_plot,
-    create_wind_speed_plot,
-    create_rainfall_plot,
-    just_wind_data,
-    munge_wind_data,
-    generate_frequency_by_cardinal_and_strength,
+from .WindPolarPlot import (
+    WindRosePlot,
+    get_wind_df,
+)
+
+from .IndividualMeasurementPlots import (
+    MeasurementPlot,
 )
 
 __all__ = [
-    'create_wind_polar_plot',
-    'create_wind_speed_plot',
-    'create_rainfall_plot',
-    'just_wind_data',
-    'munge_wind_data',
-    'generate_frequency_by_cardinal_and_strength'
+    'WindRosePlot',
+    'MeasurementPlot',
+    'get_wind_df',
 ]
