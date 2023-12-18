@@ -20,6 +20,8 @@ from uuid import uuid4
 from flask_caching import Cache
 from celery import Celery
 
+ic.disable()
+
 
 # TODO: Get rid of this when date picker is enabled
 launch_uid = uuid4()
@@ -74,7 +76,7 @@ def get_cached_data(measurement):
 @cache.memoize()
 def cache_wind_data():
     ic()
-    df = ic(get_wind_df(db_fp=default_fp,
+    df = ic(get_wind_df(db_fp=default,
                         start_date=default_start,
                         end_date=default_end,
                         ))
@@ -106,6 +108,7 @@ def populate_cache(interval):
     # background_callback_manager=celery_background,
 )
 def populate_wind_cache(signal):
+    ic()
     ic(cache_wind_data())
     ic("wind data cached")
 
@@ -291,7 +294,7 @@ dash_app.layout = html.Div([
     # dcc.Store(id='all_data', storage_type='memory', data=[]),
     # html.Div(id='data-retrieval-status'),
     # dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    ic(dcc.Interval(id='interval', interval=1000 * 60)),
+    dcc.Interval(id='interval', interval=1000 * 60),
     # html.Div(id='getting-data', children=[])
 
 
@@ -307,12 +310,7 @@ dash_app.layout = html.Div([
 ])
 
 
-def main():
-    ic.enable()
-    dash_app.run_server(debug=True)
-    # dash_app.run(debug=True)
-    # app.run(host='0.0.0.0', debug=False)
-
 
 if __name__ == "__main__":
-    main()
+    ic.enable()
+    dash_app.run(debug=True)

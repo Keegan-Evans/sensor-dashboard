@@ -48,10 +48,10 @@ def limit_observations(df, number_of_observations):
                         num_results // number_of_observations)
 
         # should start at index of first entry, not zero
-    selection_ids = ic(list(range(
+    selection_ids = list(range(
             0,
             num_results,
             entry_spacing
-        )))
+        ))
     df = ic(df.iloc[selection_ids])
     return df
