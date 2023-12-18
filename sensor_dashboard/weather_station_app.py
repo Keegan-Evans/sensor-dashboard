@@ -79,6 +79,8 @@ def cache_wind_data():
                         ))
     return df
 
+cache_wind_data()
+
 
 ###################
 # data management callbacks
