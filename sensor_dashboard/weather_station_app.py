@@ -1,3 +1,5 @@
+from doctest import debug
+from tabnanny import verbose
 import uu
 from dash import Dash, html, dcc, Output, Input, State, CeleryManager, no_update, ctx
 from dash.exceptions import PreventUpdate
@@ -33,9 +35,9 @@ CACHE_CONFIG = {
     'CACHE_REDIS_URL': REDIS_URL
 }
 celery_app = ic(Celery(__name__, broker=REDIS_URL, backend=REDIS_URL))
-background_callback_manager = ic(CeleryManager(celery_app,
+celery_background = ic(CeleryManager(celery_app,
                                                cache_by=[lambda: launch_uid]))
-dash_app = ic(Dash(background_callback_manager=background_callback_manager))
+dash_app = ic(Dash(background_callback_manager=celery_background))
 dash_server = ic(dash_app.server)
 
 
@@ -80,7 +82,8 @@ def cache_wind_data():
     Output('signal', 'data'),
     # Input('get-data', 'n_clicks'),
     Input('interval', 'n_intervals'),
-    background=True,
+    # background=True,
+    # background_callback_manager=celery_background,
 )
 def populate_cache(interval):
     ic()
@@ -90,7 +93,9 @@ def populate_cache(interval):
 @dash_app.callback(
     Output('wind-signal', 'data'),
     [Input('signal', 'data')],
-    prevent_initial_call=True
+    prevent_initial_call=True,
+    # background=True,
+    # background_callback_manager=celery_background,
 )
 def populate_wind_cache(signal):
     ic(cache_wind_data())
@@ -281,10 +286,6 @@ dash_app.layout = html.Div([
     dcc.Interval(id='interval', interval=1000 * 30),
     # html.Div(id='getting-data', children=[])
 
-    html.Div([
-        html.P(id="paragraph_id", children=["Wait for data to update"]),
-        html.Progress(id="progress_bar", value="0"),
-        ]),
 
     html.Div(id='wind_polar', children=[]),
     html.Div(id='windspeed_plot', children=[]),
@@ -301,7 +302,8 @@ dash_app.layout = html.Div([
 def main():
     ic.enable()
     ic("running app")
-    dash_app.run_server(debug=True)
+    # dash_app.run_server(debug=True)
+    dash_app.run(debug=True)
     # app.run(host='0.0.0.0', debug=False)
 
 
