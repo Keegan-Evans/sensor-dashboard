@@ -1,7 +1,4 @@
-from doctest import debug
-from tabnanny import verbose
-import uu
-from dash import Dash, html, dcc, Output, Input, State, CeleryManager, no_update, ctx
+from dash import Dash, html, dcc, Output, Input, State, CeleryManager, ctx
 from dash.exceptions import PreventUpdate
 from sensor_dashboard.connection import get_queried_df, testing_fp, default_fp
 
@@ -37,9 +34,7 @@ CACHE_CONFIG = {
     'CACHE_REDIS_URL': REDIS_URL
 }
 celery_app = ic(Celery(__name__, broker=REDIS_URL, backend=REDIS_URL))
-celery_background = ic(CeleryManager(celery_app,
-                                    #  cache_by=[lambda: launch_uid]
-                                     ))
+celery_background = ic(CeleryManager(celery_app))
 dash_app = ic(Dash(background_callback_manager=celery_background))
 dash_app = Dash()
 dash_server = ic(dash_app.server)
@@ -57,9 +52,9 @@ ic(cache.init_app(dash_server, CACHE_CONFIG))
 @cache.memoize()
 def cache_data():
     ic()
-    df = ic(get_queried_df(db_fp=testing_fp,
-                           start_date=default_start,
-                           end_date=default_end,
+    df = ic(get_queried_df(db_fp=default_fp,
+                        #    start_date=default_start,
+                        #    end_date=default_end,
                            ))
     return df
 
@@ -76,9 +71,9 @@ def get_cached_data(measurement):
 @cache.memoize()
 def cache_wind_data():
     ic()
-    df = ic(get_wind_df(db_fp=testing_fp,
-                        start_date=default_start,
-                        end_date=default_end,
+    df = ic(get_wind_df(db_fp=default_fp,
+                        # start_date=default_start,
+                        # end_date=default_end,
                         ))
     return df
 
