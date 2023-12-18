@@ -15,7 +15,7 @@ import pandas as pd
 from sensor_dashboard.util import get_default_dates
 import sensor_dashboard.util as util
 import os
-from uuid import uuid4
+# from uuid import uuid4
 
 from flask_caching import Cache
 from celery import Celery
@@ -24,7 +24,7 @@ ic.disable()
 
 
 # TODO: Get rid of this when date picker is enabled
-launch_uid = uuid4()
+# launch_uid = uuid4()
 default_dates = default_start, default_end = get_default_dates()
 
 
@@ -36,12 +36,12 @@ CACHE_CONFIG = {
     'CACHE_TYPE': 'redis',
     'CACHE_REDIS_URL': REDIS_URL
 }
-celery_app = ic(Celery('celery_farm', broker=REDIS_URL, backend=REDIS_URL))
-# celery_app.start()
+celery_app = ic(Celery(__name__, broker=REDIS_URL, backend=REDIS_URL))
 celery_background = ic(CeleryManager(celery_app,
                                     #  cache_by=[lambda: launch_uid]
                                      ))
 dash_app = ic(Dash(background_callback_manager=celery_background))
+dash_app = Dash()
 dash_server = ic(dash_app.server)
 
 
@@ -57,14 +57,14 @@ ic(cache.init_app(dash_server, CACHE_CONFIG))
 @cache.memoize()
 def cache_data():
     ic()
-    df = ic(get_queried_df(db_fp=default_fp,
+    df = ic(get_queried_df(db_fp=testing_fp,
                            start_date=default_start,
                            end_date=default_end,
                            ))
     return df
 
 
-# ic(cache_data())
+ic(cache_data())
 
 
 def get_cached_data(measurement):
@@ -76,24 +76,21 @@ def get_cached_data(measurement):
 @cache.memoize()
 def cache_wind_data():
     ic()
-    df = ic(get_wind_df(db_fp=default,
+    df = ic(get_wind_df(db_fp=testing_fp,
                         start_date=default_start,
                         end_date=default_end,
                         ))
     return df
 
-# ic(cache_wind_data())
+ic(cache_wind_data())
 
 
 ###################
 # data management callbacks
 @dash_app.callback(
     Output('signal', 'data'),
-    # Input('get-data', 'n_clicks'),
     Input('interval', 'n_intervals'),
-    # background=True,
     # background_callback_manager=celery_background,
-    # prevent_initial_call=False,
 )
 def populate_cache(interval):
     ic()
@@ -294,7 +291,7 @@ dash_app.layout = html.Div([
     # dcc.Store(id='all_data', storage_type='memory', data=[]),
     # html.Div(id='data-retrieval-status'),
     # dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    dcc.Interval(id='interval', interval=1000 * 60),
+    dcc.Interval(id='interval', interval=1000 * 60 * 5),
     # html.Div(id='getting-data', children=[])
 
 
@@ -308,9 +305,10 @@ dash_app.layout = html.Div([
     dcc.Store('signal'),
     dcc.Store('wind-signal')
 ])
+ic("end bookmark")
 
 
 
 if __name__ == "__main__":
     ic.enable()
-    dash_app.run(debug=True)
+    dash_app.run('0.0.0.0', debug=True)

@@ -1,3 +1,4 @@
+from numpy import empty
 import pandas as pd
 from sensor_dashboard.connection import get_queried_df, testing_fp
 from sensor_dashboard.util import get_default_dates
@@ -126,59 +127,61 @@ class MeasurementPlot:
     def draw_plot(self, trigger):
         ic()
         self.update_df()
+        if self.target_df is empty:
+            raise PreventUpdate
 
         return self.figure
 
 
-if __name__ == '__main__':
-    from sensor_dashboard.util import get_default_dates
+# if __name__ == '__main__':
+#     # from sensor_dashboard.util import get_default_dates
 
-    #######################
-    # App and Cache setup
-    ic.enable()
-    dash_app = ic(Dash())
-    dash_server = ic(dash_app.server)
+#     # #######################
+#     # # App and Cache setup
+#     # ic.enable()
+#     # dash_app = ic(Dash())
+#     # dash_server = ic(dash_app.server)
 
-    CACHE_CONFIG = {
-        'CACHE_TYPE': 'redis',
-        'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
-    }
+#     # CACHE_CONFIG = {
+#     #     'CACHE_TYPE': 'redis',
+#     #     'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
+#     # }
 
-    cache = ic(Cache())
-    assert isinstance(cache, Cache)
+#     # cache = ic(Cache())
+#     # assert isinstance(cache, Cache)
 
-    ic(cache.init_app(dash_server, CACHE_CONFIG))
+#     # ic(cache.init_app(dash_server, CACHE_CONFIG))
 
-    @cache.memoize()
-    def cache_data():
-        ic()
-        df = ic(get_queried_df(db_fp=testing_fp,
-                               start_date=default_start,
-                               end_date=default_end,
-                               ))
-        return df
+#     # @cache.memoize()
+#     # def cache_data():
+#     #     ic()
+#     #     df = ic(get_queried_df(db_fp=testing_fp,
+#     #                            start_date=default_start,
+#     #                            end_date=default_end,
+#     #                            ))
+#     #     return df
     
     
-    def get_cached_data(measurement):
-        df = cache_data()
-        df = df[df['measurement'] == measurement]
-        return df
+#     # def get_cached_data(measurement):
+#     #     df = cache_data()
+#     #     df = df[df['measurement'] == measurement]
+#     #     return df
 
-    default_start, default_end = get_default_dates()
+#     # default_start, default_end = get_default_dates()
 
-    temperature_plot = MeasurementPlot(
-        target_measurement='temperature',
-        units='°C',
-        measurement_range=[-25, 35],
-        input_name='interval',
-        output_name='temperature_plot',
-        app=dash_app,
-        title='Temperature',
-        data_caller=get_cached_data)
+#     # temperature_plot = MeasurementPlot(
+#     #     target_measurement='temperature',
+#     #     units='°C',
+#     #     measurement_range=[-25, 35],
+#     #     input_name='interval',
+#     #     output_name='temperature_plot',
+#     #     app=dash_app,
+#     #     title='Temperature',
+#     #     data_caller=get_cached_data)
 
-    dash_app.layout = html.Div([
-        html.Div(id='temperature_plot', children=["Loading Temperature Data"]),
-        dcc.Interval(id='interval', interval=1000 * 25),
-    ])
+#     # dash_app.layout = html.Div([
+#     #     html.Div(id='temperature_plot', children=["Loading Temperature Data"]),
+#     #     dcc.Interval(id='interval', interval=1000 * 25),
+#     # ])
 
-    dash_app.run(debug=True)
+#     # dash_app.run(debug=True)

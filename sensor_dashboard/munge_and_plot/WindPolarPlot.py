@@ -1,6 +1,7 @@
 from icecream import ic
 import datetime as dt
 import pandas as pd
+from numpy import empty
 import numpy as np
 import plotly.graph_objects as go
 from sensor_dashboard.connection import testing_fp
@@ -324,68 +325,70 @@ class WindRosePlot:
     def draw_plot(self, trigger):
         ic()
         self.update_df()
+        if self.target_df is empty:
+            raise PreventUpdate
         return self.figure
 
 
-if __name__ == '__main__':
-    #####################
-    # test wind df generation
-    ic.enable()
-    dates = get_default_dates()
-    results = ic(get_wind_df(db_fp=testing_fp,
-                             start_date=dates[0],
-                             end_date=dates[1]))
-    ic(results.columns)
-    ######################
+# if __name__ == '__main__':
+#     #####################
+#     # test wind df generation
+#     ic.enable()
+#     dates = get_default_dates()
+#     results = ic(get_wind_df(db_fp=testing_fp,
+#                              start_date=dates[0],
+#                              end_date=dates[1]))
+#     ic(results.columns)
+#     ######################
 
-    # # for testing plotting
-    from dash import dcc, Dash, html
-    import os
-    from flask_caching import Cache
-# 
-    ######################
-    # App and Cache setup
-    ic.enable()
-    dash_app = ic(Dash())
-    dash_server = ic(dash_app.server)
-# 
-    CACHE_CONFIG = {
-        'CACHE_TYPE': 'redis',
-        'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
-    }
-# 
-    cache = ic(Cache())
-    assert isinstance(cache, Cache)
-# 
-    ic(cache.init_app(dash_server, CACHE_CONFIG))
-# 
-# 
-    #################
-    # cached data
-# 
-    default_dates = default_start, default_end = get_default_dates()
-# 
-    @cache.memoize()
-    def cache_wind_data():
-        ic()
-        df = ic(get_wind_df(db_fp=testing_fp,
-                            start_date=default_start,
-                            end_date=default_end,
-                            ))
-        return df
-# 
-# 
-    polar_plot = WindRosePlot(input_name='draw-wind',
-                              output_name='polar-plot',
-                              app=dash_app,
-                              data_caller=cache_wind_data,
-                              )
-# 
-    dash_app.layout = html.Div([
-        html.Button('draw-wind', id='draw-wind'),
-        html.Div(id='polar-plot', children=[]),
-    ])
-# 
-    dash_app.run(debug=True)
-# 
-# 
+#     # # for testing plotting
+#     from dash import dcc, Dash, html
+#     import os
+#     from flask_caching import Cache
+# # 
+#     ######################
+#     # App and Cache setup
+#     ic.enable()
+#     dash_app = ic(Dash())
+#     dash_server = ic(dash_app.server)
+# # 
+#     CACHE_CONFIG = {
+#         'CACHE_TYPE': 'redis',
+#         'CACHE_REDIS_URL': os.environ.get('REDIS_URL', 'redis://localhost:6379')
+#     }
+# # 
+#     cache = ic(Cache())
+#     assert isinstance(cache, Cache)
+# # 
+#     ic(cache.init_app(dash_server, CACHE_CONFIG))
+# # 
+# # 
+#     #################
+#     # cached data
+# # 
+#     default_dates = default_start, default_end = get_default_dates()
+# # 
+#     @cache.memoize()
+#     def cache_wind_data():
+#         ic()
+#         df = ic(get_wind_df(db_fp=testing_fp,
+#                             start_date=default_start,
+#                             end_date=default_end,
+#                             ))
+#         return df
+# # 
+# # 
+#     polar_plot = WindRosePlot(input_name='draw-wind',
+#                               output_name='polar-plot',
+#                               app=dash_app,
+#                               data_caller=cache_wind_data,
+#                               )
+# # 
+#     dash_app.layout = html.Div([
+#         html.Button('draw-wind', id='draw-wind'),
+#         html.Div(id='polar-plot', children=[]),
+#     ])
+# # 
+#     dash_app.run(debug=True)
+# # 
+# # 
