@@ -61,7 +61,7 @@ def cache_data():
     return df
 
 
-cache_data()
+ic(cache_data())
 
 
 def get_cached_data(measurement):
@@ -79,7 +79,7 @@ def cache_wind_data():
                         ))
     return df
 
-cache_wind_data()
+ic(cache_wind_data())
 
 
 ###################
