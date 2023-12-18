@@ -34,9 +34,10 @@ CACHE_CONFIG = {
     'CACHE_TYPE': 'redis',
     'CACHE_REDIS_URL': REDIS_URL
 }
-celery_app = ic(Celery(__name__, broker=REDIS_URL, backend=REDIS_URL))
+celery_app = ic(Celery('celery_farm', broker=REDIS_URL, backend=REDIS_URL))
+# celery_app.start()
 celery_background = ic(CeleryManager(celery_app,
-                                               cache_by=[lambda: launch_uid]))
+                                     cache_by=[lambda: launch_uid]))
 dash_app = ic(Dash(background_callback_manager=celery_background))
 dash_server = ic(dash_app.server)
 
@@ -58,6 +59,9 @@ def cache_data():
                            end_date=default_end,
                            ))
     return df
+
+
+cache_data()
 
 
 def get_cached_data(measurement):
@@ -84,6 +88,7 @@ def cache_wind_data():
     Input('interval', 'n_intervals'),
     # background=True,
     # background_callback_manager=celery_background,
+    # prevent_initial_call=False,
 )
 def populate_cache(interval):
     ic()
@@ -283,7 +288,7 @@ dash_app.layout = html.Div([
     # dcc.Store(id='all_data', storage_type='memory', data=[]),
     # html.Div(id='data-retrieval-status'),
     # dcc.Store(id='wind_data', storage_type='memory', data=[]),
-    dcc.Interval(id='interval', interval=1000 * 30),
+    ic(dcc.Interval(id='interval', interval=1000 * 3)),
     # html.Div(id='getting-data', children=[])
 
 
@@ -301,9 +306,8 @@ dash_app.layout = html.Div([
 
 def main():
     ic.enable()
-    ic("running app")
-    # dash_app.run_server(debug=True)
-    dash_app.run(debug=True)
+    dash_app.run_server(debug=True)
+    # dash_app.run(debug=True)
     # app.run(host='0.0.0.0', debug=False)
 
 
